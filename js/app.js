@@ -3511,10 +3511,29 @@ function switchInst(os) {
   } else {
     document.getElementById("instServerPre").textContent = INST_SRV_RH;
   }
+  var sel = document.querySelectorAll(
+    "#sec-install .window-box:first-child .btn-sm",
+  );
+  if (sel.length >= 2) {
+    sel[0].className =
+      os === "ubuntu" ? "btn-sm btn-primary" : "btn-sm btn-secondary";
+    sel[1].className =
+      os === "rhel" ? "btn-sm btn-primary" : "btn-sm btn-secondary";
+  }
 }
 function switchAgent(os) {
   var m = { linux: INST_AG_LIN, windows: INST_AG_WIN, macos: INST_AG_MAC };
   document.getElementById("instAgentPre").textContent = m[os] || INST_AG_LIN;
+  var btns = document.querySelectorAll(
+    "#sec-install .window-box:nth-child(2) .btn-sm, #sec-install .window-box:nth-of-type(2) .btn-sm",
+  );
+  if (btns.length < 3)
+    btns = document.querySelectorAll("#sec-install .window-box .btn-sm");
+  for (var i = 0; i < btns.length; i++) {
+    var txt = btns[i].textContent.toLowerCase();
+    btns[i].className =
+      txt.indexOf(os) >= 0 ? "btn-sm btn-primary" : "btn-sm btn-secondary";
+  }
 }
 function copyPre(btn) {
   var pre = btn.parentElement.querySelector("pre");
