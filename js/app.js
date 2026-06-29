@@ -3364,4 +3364,8 @@ function bindEvents() {
   });
 }
 
-bindEvents();
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", bindEvents);
+} else {
+  bindEvents();
+}
