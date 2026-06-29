@@ -67,6 +67,12 @@ Mendukung 100+ pola log, smart parser untuk log yang tidak dikenal, proses batch
 
 ## 🚀 Quick Start
 
+### 🌐 Live Demo
+
+**https://1tsprune.github.io/wazgen/** — langsung akses, no install needed.
+
+### Or run locally
+
 Just open [`index.html`](index.html) in any modern browser. No server required.
 
 ```
