@@ -2660,8 +2660,6 @@ function validateXml() {
 var tabLabels = {
   rule: "local_rules.xml",
   decoder: "local_decoder.xml",
-  ossec: "ossec.conf",
-  test: "terminal",
   regex: "regex_tester",
   editor: "rule_editor.xml",
   preview: "alert_preview",
