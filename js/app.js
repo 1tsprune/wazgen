@@ -2605,10 +2605,17 @@ var tabLabels = {
   ossec: "ossec.conf",
   test: "terminal",
   editor: "rule_editor.xml",
+  preview: "alert_preview",
 };
 function switchTab(name) {
   curTab = name;
   getEl("outLabel").textContent = tabLabels[name] || "output";
+  if (name === "preview") {
+    getEl("outEditor").style.display = "none";
+    getEl("outCode").style.display = "block";
+    getEl("outCode").textContent = generatePreview();
+    return;
+  }
   getEl("outEditor").style.display = name === "editor" ? "block" : "none";
   getEl("outCode").style.display = name === "editor" ? "none" : "block";
   if (name === "editor") {
@@ -2616,6 +2623,75 @@ function switchTab(name) {
   } else {
     getEl("outCode").textContent = genData[name] || "";
   }
+}
+
+function generatePreview() {
+  var log = getEl("logInput").value.trim();
+  var det = detectType(log);
+  var p = det ? JSON.parse(JSON.stringify(det)) : smartParse(log);
+  var lv =
+    getEl("levelOverride").value === "auto"
+      ? p.rl.lv || 7
+      : parseInt(getEl("levelOverride").value);
+  var ip = log.match(/(\d+\.\d+\.\d+\.\d+)/);
+  var srcip = ip ? ip[1] : "-";
+  var user = p.rl.mt || "-";
+  var mitre = selMitre.length > 0 ? selMitre : p.mi || ["-"];
+  var lvLabel =
+    lv <= 4 ? "INFO" : lv <= 7 ? "MEDIUM" : lv <= 11 ? "HIGH" : "CRITICAL";
+  var lvColor =
+    lv <= 4 ? "34d399" : lv <= 7 ? "fbbf24" : lv <= 11 ? "f97316" : "ef4444";
+  var rid = parseInt(getEl("ruleId").value) || 100200;
+  var logShort = log.length > 80 ? log.substring(0, 80) + "..." : log;
+
+  return "".concat(
+    "┌─────────────────────────────────────────────────────────┐\n",
+    "│  ",
+    String.fromCharCode(0x1f6a8),
+    "  ALERT PREVIEW — Level ",
+    lv,
+    " ",
+    lvLabel,
+    "                 │\n",
+    "├─────────────────────────────────────────────────────────┤\n",
+    "│  Rule ID    ",
+    rid,
+    "                                      │\n",
+    "│  Level      ",
+    lv,
+    " — ",
+    lvLabel,
+    "                                    │\n",
+    "│  Description  ",
+    p.rl.ds || "-",
+    "          │\n",
+    "│  Timestamp  ",
+    new Date().toISOString().replace("T", " ").substring(0, 19),
+    "             │\n",
+    "│  Source IP  ",
+    srcip,
+    "                                          │\n",
+    "│  Program    ",
+    p.prog || "-",
+    "                                          │\n",
+    "│  MITRE      ",
+    mitre.join(", "),
+    "                                    │\n",
+    "├─────────────────────────────────────────────────────────┤\n",
+    "│  Log: ",
+    logShort,
+    "   │\n",
+    "├─────────────────────────────────────────────────────────┤\n",
+    "│  ",
+    String.fromCharCode(0x26a1),
+    " Alert akan muncul di Wazuh dashboard dengan     │\n",
+    '│     group "',
+    p.rl.gr || "local",
+    '" dan tag MITRE ',
+    mitre[0],
+    "   │\n",
+    "└─────────────────────────────────────────────────────────┘",
+  );
 }
 
 // ==================== COPY ====================
