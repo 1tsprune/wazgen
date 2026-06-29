@@ -150,6 +150,7 @@
     <button data-tab="decoder">Decoder XML</button>
     <button data-tab="ossec">ossec.conf</button>
     <button data-tab="test">Test</button>
+    <button data-tab="regex"><i class="ti ti-code"></i> Regex</button>
     <button data-tab="editor">Editor</button>
   </div>
   <div class="output-header">
@@ -257,7 +258,7 @@
 </div>
 <div class="window-box">
 <div class="window-bar"><span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span><span class="window-title">RULE_DEPLOY</span></div>
-<div class="window-body"><div class="code-block"><button class="copy-btn">Copy</button><pre>sudo cp local_rules.xml /var/ossec/etc/rules/
+<div class="window-body"><div class="code-block"><button class="copy-btn" onclick="copyPre(this)">Copy</button><pre>sudo cp local_rules.xml /var/ossec/etc/rules/
 sudo chown root:wazuh /var/ossec/etc/rules/local_rules.xml
 sudo chmod 640 /var/ossec/etc/rules/local_rules.xml
 echo 'your log here' | /var/ossec/bin/wazuh-logtest

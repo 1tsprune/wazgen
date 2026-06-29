@@ -2662,6 +2662,7 @@ var tabLabels = {
   decoder: "local_decoder.xml",
   ossec: "ossec.conf",
   test: "terminal",
+  regex: "regex_tester",
   editor: "rule_editor.xml",
   preview: "alert_preview",
 };
@@ -2672,6 +2673,12 @@ function switchTab(name) {
     getEl("outEditor").style.display = "none";
     getEl("outCode").style.display = "block";
     getEl("outCode").textContent = generatePreview();
+    return;
+  }
+  if (name === "regex") {
+    getEl("outEditor").style.display = "none";
+    getEl("outCode").style.display = "block";
+    getEl("outCode").textContent = generateRegexTest();
     return;
   }
   getEl("outEditor").style.display = name === "editor" ? "block" : "none";
@@ -2750,6 +2757,74 @@ function generatePreview() {
     "   │\n",
     "└─────────────────────────────────────────────────────────┘",
   );
+}
+
+function generateRegexTest() {
+  var log = getEl("logInput").value.trim();
+  if (!log) return "Paste log sample dulu, generate rule, lalu buka tab Regex.";
+  var ruleXml = genData.rule || "";
+  var rxMatch = ruleXml.match(/<match>([^<]+)<\/match>/);
+  var rxRegex = ruleXml.match(/<regex>([^<]+)<\/regex>/);
+  var matchPattern = rxMatch ? rxMatch[1] : "(none)";
+  var regexPattern = rxRegex ? rxRegex[1] : "(none)";
+  var results = "";
+  if (matchPattern && matchPattern !== "(none)") {
+    try {
+      var re = new RegExp(matchPattern, "i");
+      var found = re.test(log);
+      results += "<match>: " + matchPattern + "\n";
+      results +=
+        "  \u2514 Test on log: " +
+        (found ? "MATCH \u2713" : "NO MATCH \u2717") +
+        "\n";
+      if (found) {
+        var execResult = re.exec(log);
+        if (execResult) {
+          for (var i = 1; i < execResult.length; i++) {
+            results += "     Capture $" + i + ": " + execResult[i] + "\n";
+          }
+        }
+      }
+    } catch (e) {
+      results +=
+        "<match>: " +
+        matchPattern +
+        "\n  \u2514 Invalid regex: " +
+        e.message +
+        "\n";
+    }
+  }
+  if (regexPattern && regexPattern !== "(none)") {
+    try {
+      var re2 = new RegExp(regexPattern);
+      var found2 = re2.test(log);
+      results += "<regex>: " + regexPattern + "\n";
+      results +=
+        "  \u2514 Test on log: " +
+        (found2 ? "MATCH \u2713" : "NO MATCH \u2717") +
+        "\n";
+      if (found2) {
+        var execResult2 = re2.exec(log);
+        if (execResult2) {
+          for (var j = 1; j < execResult2.length; j++) {
+            results += "     Capture $" + j + ": " + execResult2[j] + "\n";
+          }
+        }
+      }
+    } catch (e) {
+      results +=
+        "<regex>: " +
+        regexPattern +
+        "\n  \u2514 Invalid regex: " +
+        e.message +
+        "\n";
+    }
+  }
+  if (!rxMatch && !rxRegex) {
+    results =
+      "Tidak ada <match> atau <regex> di rule yang di-generate.\nCoba generate rule untuk log sample terlebih dahulu.";
+  }
+  return results;
 }
 
 // ==================== COPY ====================
@@ -3230,25 +3305,28 @@ function bindEvents() {
     genData.rule = this.value;
   });
 
-  // Save to history on generate
-  var origGen = generateRule;
+  // Re-bind genBtn after history override
+  var origGen2 = generateRule;
   generateRule = function () {
-    origGen();
-    var log = getEl("logInput").value.trim();
-    if (!log) return;
-    var det = detectType(log);
-    var name = det ? det.name : "Custom Log";
-    var hist = JSON.parse(localStorage.getItem("wazgenHistory") || "[]");
-    hist.unshift({
+    origGen2();
+    var log2 = getEl("logInput").value.trim();
+    if (!log2) return;
+    var det2 = detectType(log2);
+    var name2 = det2 ? det2.name : "Custom Log";
+    var hist2 = JSON.parse(localStorage.getItem("wazgenHistory") || "[]");
+    hist2.unshift({
       id: getEl("ruleId").value - 1,
-      name: name,
-      log: log.substring(0, 80),
+      name: name2,
+      log: log2.substring(0, 80),
       time: new Date().toISOString(),
       rule: genData.rule,
     });
-    if (hist.length > 50) hist = hist.slice(0, 50);
-    localStorage.setItem("wazgenHistory", JSON.stringify(hist));
+    if (hist2.length > 50) hist2 = hist2.slice(0, 50);
+    localStorage.setItem("wazgenHistory", JSON.stringify(hist2));
   };
+  // Re-bind to use the overridden version
+  getEl("genBtn").removeEventListener("click", origGen2);
+  getEl("genBtn").addEventListener("click", generateRule);
 
   // History
   getEl("historyClear").addEventListener("click", function () {
@@ -3430,8 +3508,11 @@ if (document.readyState === "loading") {
 
 // ==================== GLOBAL HANDLERS ====================
 function switchInst(os) {
-  if (os === "ubuntu") { document.getElementById("instServerPre").textContent = INST_SRV_UB; }
-  else { document.getElementById("instServerPre").textContent = INST_SRV_RH; }
+  if (os === "ubuntu") {
+    document.getElementById("instServerPre").textContent = INST_SRV_UB;
+  } else {
+    document.getElementById("instServerPre").textContent = INST_SRV_RH;
+  }
 }
 function switchAgent(os) {
   var m = { linux: INST_AG_LIN, windows: INST_AG_WIN, macos: INST_AG_MAC };
@@ -3440,5 +3521,8 @@ function switchAgent(os) {
 function copyPre(btn) {
   var pre = btn.parentElement.querySelector("pre");
   if (!pre) return;
-  if (navigator.clipboard) navigator.clipboard.writeText(pre.textContent).then(function(){toast("Copied!");});
+  if (navigator.clipboard)
+    navigator.clipboard.writeText(pre.textContent).then(function () {
+      toast("Copied!");
+    });
 }
