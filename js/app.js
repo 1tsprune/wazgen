@@ -1851,7 +1851,11 @@ var DB = [
     th: "Monitor",
   },
 
-  // === MALWARE / OTHER ===
+  // === COMMUNITY (bayusky) ===
+  {
+    id: "opencti",
+    cat: "ids",
+    name: ALWARE / OTHER ===
   {
     id: "webshell",
     cat: "malware",
