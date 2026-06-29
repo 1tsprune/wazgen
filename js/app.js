@@ -1851,7 +1851,7 @@ var DB = [
     th: "Monitor",
   },
 
-  // === COMMUNITY (bayusky) ===
+  // === THREAT INTEL ===
   {
     id: "opencti",
     cat: "ids",
