@@ -236,10 +236,10 @@
 <div class="window-bar"><span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span><span class="window-title">WAZUH_SERVER.SH</span></div>
 <div class="window-body">
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-    <button class="btn-sm btn-primary" id="instUbuntu">Ubuntu 22.04+</button>
-    <button class="btn-sm btn-secondary" id="instRhel">RHEL 9 / Rocky 9</button>
+    <button class="btn-sm btn-primary" onclick="switchInst('ubuntu')">Ubuntu 22.04+</button>
+    <button class="btn-sm btn-secondary" onclick="switchInst('rhel')">RHEL 9 / Rocky 9</button>
   </div>
-  <div class="code-block"><button class="copy-btn">Copy</button><pre id="instServerPre">Loading...</pre></div>
+  <div class="code-block"><button class="copy-btn" onclick="copyPre(this)">Copy</button><pre id="instServerPre">Loading...</pre></div>
 </div>
 </div>
 </div>
@@ -248,16 +248,16 @@
 <div class="window-bar"><span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span><span class="window-title">WAZUH_AGENT.SH</span></div>
 <div class="window-body">
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-    <button class="btn-sm btn-primary" id="agentLinux">Linux</button>
-    <button class="btn-sm btn-secondary" id="agentWindows">Windows</button>
-    <button class="btn-sm btn-secondary" id="agentMacos">macOS</button>
+    <button class="btn-sm btn-primary" onclick="switchAgent('linux')">Linux</button>
+    <button class="btn-sm btn-secondary" onclick="switchAgent('windows')">Windows</button>
+    <button class="btn-sm btn-secondary" onclick="switchAgent('macos')">macOS</button>
   </div>
-  <div class="code-block"><button class="copy-btn">Copy</button><pre id="instAgentPre">Loading...</pre></div>
+  <div class="code-block"><button class="copy-btn" onclick="copyPre(this)">Copy</button><pre id="instAgentPre">Loading...</pre></div>
 </div>
 </div>
 <div class="window-box">
 <div class="window-bar"><span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span><span class="window-title">RULE_DEPLOY</span></div>
-<div class="window-body"><div class="code-block"><button class="copy-btn">Copy</button><pre>sudo cp local_rules.xml /var/ossec/etc/rules/
+<div class="window-body"><div class="code-block"><button class="copy-btn" onclick="copyPre(this)">Copy</button><pre>sudo cp local_rules.xml /var/ossec/etc/rules/
 sudo chown root:wazuh /var/ossec/etc/rules/local_rules.xml
 sudo chmod 640 /var/ossec/etc/rules/local_rules.xml
 echo 'your log here' | /var/ossec/bin/wazuh-logtest
