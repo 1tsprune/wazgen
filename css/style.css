@@ -191,14 +191,17 @@ body {
     height: 18px;
     display: block;
 }
-.dark .theme-btn .sun-icon {
+.theme-btn .sun-icon {
     display: none;
+}
+.dark .theme-btn .sun-icon {
+    display: block;
 }
 .theme-btn .moon-icon {
-    display: none;
+    display: block;
 }
 .dark .theme-btn .moon-icon {
-    display: block;
+    display: none;
 }
 
 /* ---- Hero ---- */
