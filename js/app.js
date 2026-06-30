@@ -2068,13 +2068,13 @@ var toastTimer = null;
 // ==================== THEME ====================
 (function () {
   var saved = localStorage.getItem("wazgenTheme") || "dark";
-  if (saved === "light") document.body.classList.add("light");
+  if (saved === "dark") document.body.classList.add("dark");
 })();
 function toggleTheme() {
-  document.body.classList.toggle("light");
+  document.body.classList.toggle("dark");
   localStorage.setItem(
     "wazgenTheme",
-    document.body.classList.contains("light") ? "light" : "dark",
+    document.body.classList.contains("dark") ? "dark" : "light",
   );
 }
 
