@@ -333,67 +333,6 @@ body {
     color: var(--muted);
 }
 
-/* ---- Window Box (Terminal UI) ---- */
-.window-box {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    overflow: hidden;
-    margin-bottom: 16px;
-    transition: border-color var(--transition);
-}
-
-.window-box:hover {
-    border-color: var(--line-accent);
-}
-
-.window-bar {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 14px;
-    background: var(--surface2);
-    border-bottom: 1px solid var(--line);
-}
-
-.window-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-}
-
-.window-dot.red {
-    background: #ff5f56;
-}
-
-.window-dot.yellow {
-    background: #ffbd2e;
-}
-
-.window-dot.green {
-    background: #27c93f;
-}
-
-.window-title {
-    flex: 1;
-    text-align: center;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted2);
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-
-.window-body {
-    padding: 24px;
-}
-
-@media (max-width: 600px) {
-    .window-body {
-        padding: 16px;
-    }
-}
-
 /* ---- Cards ---- */
 .card {
     background: var(--surface);
@@ -1375,10 +1314,6 @@ footer a {
 
     .file-row {
         flex-wrap: wrap;
-    }
-
-    .window-body {
-        padding: 16px;
     }
 }
 

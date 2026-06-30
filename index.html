@@ -63,17 +63,16 @@
 <div class="grid-2" style="align-items:start">
 <div>
 
-<div class="window-box">
-<div class="window-bar">
-  <span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span>
-  <span class="window-title">LOG_SAMPLE.INPUT</span>
-</div>
-<div class="window-body">
-  <div class="form-label">Paste log sample</div>
-  <textarea class="textarea" id="logInput" placeholder="Paste log sample di sini...&#10;&#10;Contoh:&#10;Jun 29 10:23:11 sshd[1234]: Failed password for root from 192.168.1.1 port 22"></textarea>
+<div class="card">
+  <div class="card-header" style="margin-bottom:10px">
+    <span class="card-title"><i class="ti ti-terminal-2"></i> Log Sample</span>
+  </div>
+  <div style="padding:0">
+    <textarea class="textarea" id="logInput" placeholder="Paste log sample di sini...&#10;&#10;Contoh:&#10;Jun 29 10:23:11 sshd[1234]: Failed password for root from 192.168.1.1 port 22"></textarea>
+  </div>
 
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
-    <span class="form-label" style="margin:0;line-height:28px">Cepat:</span>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center">
+    <span class="form-label" style="margin:0;line-height:28px;font-size:10px">Coba:</span>
     <div class="examples" id="exBtns" style="margin:0">
       <button data-key="ssh">SSH</button>
       <button data-key="squid">Squid</button>
@@ -89,26 +88,22 @@
     </div>
   </div>
 
-  <div class="file-row">
-    <span class="form-label" style="margin:0;white-space:nowrap">Upload file:</span>
+  <div class="file-row" style="margin-top:10px">
+    <span class="form-label" style="margin:0;white-space:nowrap;font-size:10px">Upload:</span>
     <input type="file" id="batchFile" accept=".log,.txt,.syslog">
     <button class="btn-sm btn-secondary" id="batchBtn" style="flex-shrink:0"><i class="ti ti-upload"></i> Parse</button>
   </div>
-  <div style="margin-top:4px;font-size:11px;color:var(--muted2)"><i class="ti ti-info-circle"></i> Multi-line file: setiap baris akan auto-detect &amp; generate rule.</div>
-</div>
+  <div style="margin-top:6px;font-size:11px;color:var(--muted2)"><i class="ti ti-info-circle"></i> Multi-line file: auto-detect &amp; generate per baris.</div>
 </div>
 
-<div style="display:flex;flex-direction:column">
-<div class="window-box">
-<div class="window-body">
-  <div class="form-label">Rule ID</div>
-  <input class="input" id="ruleId" type="number" value="100200" min="100000" max="999999">
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
+<div class="card" style="flex:1;min-width:120px;padding:14px 16px">
+  <div class="form-label" style="font-size:10px">Rule ID</div>
+  <input class="input" id="ruleId" type="number" value="100200" min="100000" max="999999" style="margin-top:4px">
 </div>
-</div>
-<div class="window-box">
-<div class="window-body">
-  <div class="form-label">Level</div>
-  <select class="select" id="levelOverride">
+<div class="card" style="flex:1;min-width:120px;padding:14px 16px">
+  <div class="form-label" style="font-size:10px">Level</div>
+  <select class="select" id="levelOverride" style="margin-top:4px">
     <option value="auto">Auto detect</option>
     <option value="3">3 Info</option>
     <option value="5">5 Low</option>
@@ -119,19 +114,15 @@
   </select>
 </div>
 </div>
-</div>
 
-<div class="window-box">
-<div class="window-bar">
-  <span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span>
-  <span class="window-title">MITRE_ATTACK.TTP</span>
-</div>
-<div class="window-body">
+<div class="card">
+  <div class="card-header" style="margin-bottom:6px">
+    <span class="card-title"><i class="ti ti-target"></i> MITRE ATT&CK</span>
+  </div>
   <div class="badges" id="mitreBadges"></div>
 </div>
-</div>
 
-<div style="display:flex;gap:8px;flex-wrap:wrap">
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
   <button class="btn-primary" id="genBtn"><i class="ti ti-wand"></i> Generate</button>
   <button class="btn-secondary" id="resetBtn"><i class="ti ti-refresh"></i> Reset</button>
 </div>
@@ -140,51 +131,41 @@
 <div id="outPanel" style="display:none">
 <div class="meta-grid" id="metaCards"></div>
 
-<div class="window-box">
-<div class="window-bar">
-  <span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span>
-  <span class="window-title">GENERATED_OUTPUT</span>
-</div>
-<div class="window-body">
-  <div class="tabs" id="outTabs">
+<div class="card">
+  <div class="card-header">
+    <span class="card-title"><i class="ti ti-code"></i> <span id="outLabel">local_rules.xml</span></span>
+    <div style="display:flex;gap:4px">
+      <span id="validBadge" style="display:none"></span>
+      <button class="btn-xs btn-secondary" id="copyBtn"><i class="ti ti-copy"></i> Copy</button>
+    </div>
+  </div>
+
+  <div class="tabs" id="outTabs" style="margin-bottom:10px">
     <button data-tab="preview"><i class="ti ti-eye"></i> Preview</button>
     <button data-tab="rule" class="active">Rule XML</button>
     <button data-tab="decoder">Decoder XML</button>
     <button data-tab="regex"><i class="ti ti-code"></i> Regex</button>
     <button data-tab="editor">Editor</button>
   </div>
-  <div class="output-header">
-    <span class="output-label" id="outLabel">local_rules.xml</span>
-    <div style="display:flex;gap:4px">
-      <span id="validBadge" style="display:none"></span>
-      <button class="btn-xs btn-secondary" id="copyBtn"><i class="ti ti-copy"></i> Copy</button>
-    </div>
-  </div>
+
   <div class="output-box">
     <pre id="outCode"></pre>
     <textarea class="textarea" id="outEditor" style="display:none;min-height:200px;font-size:11px"></textarea>
   </div>
-  <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+  <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
     <button class="btn-xs btn-secondary" id="validateBtn"><i class="ti ti-check"></i> Validate XML</button>
     <button class="btn-xs btn-secondary" id="editBtn"><i class="ti ti-edit"></i> Edit</button>
   </div>
 </div>
-</div>
 
 <!-- Batch results -->
 <div id="batchPanel" style="display:none;margin-top:10px">
-<div class="window-box">
-<div class="window-bar">
-  <span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span>
-  <span class="window-title">BATCH_RESULTS</span>
-</div>
-<div class="window-body">
-  <div class="output-header">
-    <span class="output-label">Generated rules</span>
+<div class="card">
+  <div class="card-header">
+    <span class="card-title"><i class="ti ti-file-stack"></i> Batch Results</span>
     <button class="btn-xs btn-secondary" id="batchCopyAll"><i class="ti ti-copy"></i> Copy All</button>
   </div>
-  <div class="output-box"><pre id="batchOutput"></pre></div>
-</div>
+  <div class="output-box" style="margin-top:8px"><pre id="batchOutput"></pre></div>
 </div>
 </div>
 </div>
@@ -201,12 +182,10 @@
   <p>100+ log patterns &mdash; klik untuk preview &amp; gunakan sample</p>
 </div>
 
-<div class="window-box">
-<div class="window-bar">
-  <span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span>
-  <span class="window-title">PATTERN_BROWSER</span>
-</div>
-<div class="window-body">
+<div class="card">
+  <div class="card-header" style="margin-bottom:12px">
+    <span class="card-title"><i class="ti ti-search"></i> Pattern Browser</span>
+  </div>
   <input class="db-search" id="dbSearch" placeholder="Cari log pattern...">
   <div class="category-filter" id="catFilter"></div>
   <div class="db-grid" id="dbList"></div>
@@ -221,7 +200,6 @@
   </div>
 </div>
 </div>
-</div>
 </section>
 
 <!-- ═══ INSTALL ═══ -->
@@ -229,21 +207,22 @@
 <div class="container">
 <div class="section-header">
   <h2><i class="ti ti-terminal-2" style="color:var(--accent)"></i> Install &amp; Deploy</h2>
-  <p>Pilih OS, copy atau download script instalasi, lalu jalankan di server Wazuh kamu.</p>
+  <p>Pilih OS, copy atau download script, lalu jalankan di server Wazuh kamu.</p>
 </div>
 
 <div class="install-desc">
   WAZGEN menyediakan script instalasi <strong>Wazuh Server</strong> dan <strong>Wazuh Agent</strong> untuk berbagai OS.
-  Pilih OS kamu, lalu <strong>copy</strong> langsung atau <strong>download</strong> script &mdash; jalankan di terminal server.
+  Pilih OS kamu, lalu <strong>copy</strong> atau <strong>download</strong> script &mdash; jalankan di terminal server.
 </div>
 
 <div style="display:flex;flex-direction:column;gap:16px">
 
 <!-- SERVER -->
-<div class="window-box">
-<div class="window-bar"><span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span><span class="window-title">WAZUH_SERVER</span></div>
-<div class="window-body">
-  <div class="form-label" style="margin-bottom:8px">Pilih OS Server</div>
+<div class="card">
+  <div class="card-header" style="margin-bottom:10px">
+    <span class="card-title"><i class="ti ti-server"></i> Wazuh Server</span>
+  </div>
+  <div class="form-label" style="margin-bottom:8px;font-size:10px">Pilih OS Server</div>
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
     <button class="btn-sm btn-primary" id="instUbuntu">Ubuntu 22.04+</button>
     <button class="btn-sm btn-secondary" id="instRhel">RHEL 9 / Rocky 9</button>
@@ -257,13 +236,13 @@
     <i class="ti ti-info-circle"></i> Script akan menginstall Wazuh manager, indexer, dan dashboard.
   </div>
 </div>
-</div>
 
 <!-- AGENT -->
-<div class="window-box">
-<div class="window-bar"><span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span><span class="window-title">WAZUH_AGENT</span></div>
-<div class="window-body">
-  <div class="form-label" style="margin-bottom:8px">Pilih OS Agent</div>
+<div class="card">
+  <div class="card-header" style="margin-bottom:10px">
+    <span class="card-title"><i class="ti ti-devices"></i> Wazuh Agent</span>
+  </div>
+  <div class="form-label" style="margin-bottom:8px;font-size:10px">Pilih OS Agent</div>
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
     <button class="btn-sm btn-primary" id="agentLinux">Linux</button>
     <button class="btn-sm btn-secondary" id="agentWindows">Windows</button>
@@ -275,18 +254,17 @@
     <pre id="instAgentPre">Loading...</pre>
   </div>
   <div style="margin-top:8px;font-size:11px;color:var(--muted2)">
-    <i class="ti ti-info-circle"></i> Ganti <code style="font-family:var(--mono);font-size:10px;background:var(--surface2);padding:1px 5px;border-radius:3px">WAZUH_MANAGER</code> dengan IP server Wazuh kamu.
+    <i class="ti ti-info-circle"></i> Ganti <code style="font-family:var(--mono);font-size:10px;background:var(--surface2);padding:1px 5px;border-radius:3px">WAZUH_MANAGER</code> dengan IP server Wazuh.
   </div>
-</div>
 </div>
 
 <!-- DEPLOY -->
-<div class="window-box">
-<div class="window-bar"><span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span><span class="window-title">RULE_DEPLOY</span></div>
-<div class="window-body">
-  <div class="form-label" style="margin-bottom:8px">Deploy Rule ke Server</div>
+<div class="card">
+  <div class="card-header" style="margin-bottom:10px">
+    <span class="card-title"><i class="ti ti-upload"></i> Deploy Rule</span>
+  </div>
   <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:10px">
-    Setelah rule di-generate, simpan sebagai <code style="font-family:var(--mono);font-size:10px;background:var(--surface2);padding:1px 5px;border-radius:3px">local_rules.xml</code> dan jalankan perintah berikut:
+    Simpan rule sebagai <code style="font-family:var(--mono);font-size:10px;background:var(--surface2);padding:1px 5px;border-radius:3px">local_rules.xml</code> dan jalankan:
   </div>
   <div class="code-block">
     <button class="copy-btn" onclick="copyPre(this)">Copy</button>
@@ -296,7 +274,6 @@ sudo chmod 640 /var/ossec/etc/rules/local_rules.xml
 echo 'your log here' | /var/ossec/bin/wazuh-logtest
 sudo systemctl restart wazuh-manager</pre>
   </div>
-</div>
 </div>
 
 </div>
@@ -308,20 +285,20 @@ sudo systemctl restart wazuh-manager</pre>
 <div class="container">
 <div class="section-header">
   <h2><i class="ti ti-history" style="color:var(--accent)"></i> Rule History</h2>
-  <p>Riwayat rule yang pernah di-generate &mdash; tersimpan di browser kamu (localStorage).</p>
+  <p>Riwayat rule yang pernah di-generate &mdash; tersimpan di browser (localStorage).</p>
 </div>
 
-<div class="window-box" id="historyEmpty" style="text-align:center;padding:40px">
+<div class="card" id="historyEmpty" style="text-align:center;padding:40px">
   <i class="ti ti-inbox" style="font-size:40px;color:var(--muted2);display:block;margin-bottom:12px"></i>
   <p style="color:var(--muted);font-size:14px">Belum ada riwayat. Generate rule dulu ya!</p>
 </div>
 
 <div id="historyList" style="display:none">
-  <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+  <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
     <button class="btn-sm btn-secondary" id="historyClear"><i class="ti ti-trash"></i> Hapus semua</button>
-    <span style="font-size:12px;color:var(--muted2);line-height:32px" id="historyCount"></span>
+    <span style="font-size:12px;color:var(--muted2)" id="historyCount"></span>
   </div>
-  <div id="historyItems" style="display:flex;flex-direction:column;gap:6px"></div>
+  <div id="historyItems"></div>
 </div>
 </div>
 </section>
@@ -341,14 +318,14 @@ sudo systemctl restart wazuh-manager</pre>
   </div>
   <div class="help-item-body">
     <ol>
-      <li><strong>Paste log</strong> sample di textarea, atau pilih dari contoh cepat, atau upload file .log</li>
-      <li><strong>Atur Rule ID</strong> &amp; Level (auto-detect atau manual)</li>
+      <li><strong>Paste log</strong> sample di textarea, atau pilih contoh cepat, atau upload file</li>
+      <li><strong>Atur Rule ID</strong> &amp; Level (auto atau manual)</li>
       <li><strong>Pilih MITRE ATT&CK</strong> techniques (opsional, multi-select)</li>
-      <li>Klik <strong>Generate</strong> &mdash; auto-generate rule XML + decoder + regex</li>
-      <li>Gunakan tab <strong>Preview</strong> untuk lihat alert hasil generate</li>
-      <li>Gunakan tab <strong>Editor</strong> untuk edit XML langsung</li>
+      <li>Klik <strong>Generate</strong> &mdash; auto-generate rule + decoder + regex</li>
+      <li>Tab <strong>Preview</strong> untuk lihat alert simulasi</li>
+      <li>Tab <strong>Editor</strong> untuk edit XML langsung</li>
       <li>Klik <strong>Validate XML</strong> untuk cek syntax</li>
-      <li><strong>Copy</strong> atau download, deploy ke server via <strong>Install</strong></li>
+      <li><strong>Copy</strong> atau download, deploy via <strong>Install</strong></li>
     </ol>
   </div>
 </div>
@@ -360,7 +337,7 @@ sudo systemctl restart wazuh-manager</pre>
     <span class="chevron"><i class="ti ti-chevron-down"></i></span>
   </div>
   <div class="help-item-body" style="display:none">
-    <p>Untuk log yang tidak ada di database, smart parser akan auto-detect format dan generate rule sesuai:</p>
+    <p>Untuk log yang tidak ada di database, smart parser auto-detect format:</p>
     <ul>
       <li><strong>JSON</strong> &mdash; auto-parse all fields</li>
       <li><strong>Syslog</strong> &mdash; timestamp + program + message</li>
@@ -379,11 +356,11 @@ sudo systemctl restart wazuh-manager</pre>
     <span class="chevron"><i class="ti ti-chevron-down"></i></span>
   </div>
   <div class="help-item-body" style="display:none">
-    <p>WAZGEN bisa diintegrasikan dengan AI lokal maupun cloud untuk generate regex pattern, MITRE mapping, &amp; deskripsi otomatis:</p>
+    <p>Integrasi dengan AI lokal maupun cloud untuk generate regex, MITRE mapping, &amp; deskripsi:</p>
     <ul>
-      <li><strong>Ollama</strong> &mdash; local, free, private. Run llama3/mistral locally.</li>
-      <li><strong>Google Gemini</strong> &mdash; free tier, 60 req/min, API key needed.</li>
-      <li><strong>Groq Cloud</strong> &mdash; free tier with Llama 3, fast inference.</li>
+      <li><strong>Ollama</strong> &mdash; local, free, private (llama3/mistral)</li>
+      <li><strong>Google Gemini</strong> &mdash; free tier, 60 req/min</li>
+      <li><strong>Groq Cloud</strong> &mdash; free tier with Llama 3</li>
     </ul>
   </div>
 </div>
