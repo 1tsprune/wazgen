@@ -815,3 +815,210 @@ footer p {
         display: none;
     }
 }
+
+/* ── Animations ── */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.section.active .card {
+    animation: fadeInUp 0.35s ease-out both;
+}
+.section.active .card:nth-child(2) {
+    animation-delay: 0.05s;
+}
+.section.active .card:nth-child(3) {
+    animation-delay: 0.1s;
+}
+
+.section.active .window-box {
+    animation: fadeInUp 0.35s ease-out both;
+}
+.section.active .window-box:nth-child(2) {
+    animation-delay: 0.05s;
+}
+.section.active .window-box:nth-child(3) {
+    animation-delay: 0.1s;
+}
+.section.active .window-box:nth-child(4) {
+    animation-delay: 0.15s;
+}
+
+.section.active .hero-badge {
+    animation: fadeInUp 0.3s ease-out both;
+}
+.section.active .hero-badge:nth-child(1) {
+    animation-delay: 0s;
+}
+.section.active .hero-badge:nth-child(2) {
+    animation-delay: 0.05s;
+}
+.section.active .hero-badge:nth-child(3) {
+    animation-delay: 0.1s;
+}
+.section.active .hero-badge:nth-child(4) {
+    animation-delay: 0.15s;
+}
+.section.active .hero-badge:nth-child(5) {
+    animation-delay: 0.2s;
+}
+
+.meta-card {
+    animation: fadeInUp 0.3s ease-out both;
+}
+.meta-card:nth-child(1) {
+    animation-delay: 0s;
+}
+.meta-card:nth-child(2) {
+    animation-delay: 0.05s;
+}
+.meta-card:nth-child(3) {
+    animation-delay: 0.1s;
+}
+.meta-card:nth-child(4) {
+    animation-delay: 0.15s;
+}
+.meta-card:nth-child(5) {
+    animation-delay: 0.2s;
+}
+
+.db-item {
+    animation: fadeInUp 0.25s ease-out both;
+}
+.db-item:nth-child(1) {
+    animation-delay: 0s;
+}
+.db-item:nth-child(2) {
+    animation-delay: 0.03s;
+}
+.db-item:nth-child(3) {
+    animation-delay: 0.06s;
+}
+.db-item:nth-child(4) {
+    animation-delay: 0.09s;
+}
+.db-item:nth-child(5) {
+    animation-delay: 0.12s;
+}
+.db-item:nth-child(6) {
+    animation-delay: 0.15s;
+}
+.db-item:nth-child(7) {
+    animation-delay: 0.18s;
+}
+.db-item:nth-child(8) {
+    animation-delay: 0.21s;
+}
+.db-item:nth-child(9) {
+    animation-delay: 0.24s;
+}
+.db-item:nth-child(10) {
+    animation-delay: 0.27s;
+}
+
+.hero-title,
+.hero p,
+.hero-badges,
+.section-header {
+    animation: fadeInUp 0.4s ease-out both;
+}
+.hero p {
+    animation-delay: 0.1s;
+}
+.hero-badges {
+    animation-delay: 0.2s;
+}
+
+/* Code block fade in */
+.code-block {
+    animation: fadeIn 0.3s ease-out both;
+}
+
+/* Output panel entrance */
+#outPanel {
+    animation: fadeInUp 0.35s ease-out;
+}
+
+/* Tabs transition */
+.tabs button {
+    transition:
+        color 0.15s,
+        border-color 0.15s;
+}
+
+/* Button hover lift */
+.btn-primary,
+.btn-secondary {
+    transition: all 0.15s;
+}
+.btn-primary:hover,
+.btn-secondary:hover {
+    transform: translateY(-1px);
+}
+
+/* Card hover subtle */
+.card,
+.window-box {
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+}
+.card:hover,
+.window-box:hover {
+    border-color: var(--accent);
+}
+
+/* Loading shimmer */
+@keyframes shimmer {
+    0% {
+        background-position: -200px 0;
+    }
+    100% {
+        background-position: calc(200px + 100%) 0;
+    }
+}
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--surface) 0%,
+        var(--surface2) 50%,
+        var(--surface) 100%
+    );
+    background-size: 200px 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-sm);
+}
