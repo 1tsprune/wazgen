@@ -1,45 +1,43 @@
 /* ========================================
-   WAZGEN — 1tsprune Design System
-   Gold accent, dark/light, minimal
+   WAZGEN — 1tsprune Design Pattern
+   Dark minimal, gold accent
    ======================================== */
-
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap");
 
 :root {
     --bg: #0f1117;
     --surface: #1a1d28;
     --surface2: #222636;
     --line: #2a3040;
-    --line-accent: rgba(212, 165, 116, 0.22);
+    --line-accent: rgba(216, 181, 122, 0.22);
     --text: #eaedf4;
     --muted: #8b93a7;
-    --muted2: #6b7280;
-    --accent: #d4a574;
-    --accent-hover: #e6c298;
-    --accent-bg: rgba(212, 165, 116, 0.1);
+    --muted2: #7a8299;
+    --accent: #d8b57a;
+    --accent-hover: #e6cc98;
+    --accent-bg: rgba(216, 181, 122, 0.1);
     --danger: #ef4444;
     --danger-bg: rgba(239, 68, 68, 0.12);
     --success: #22c55e;
     --success-bg: rgba(34, 197, 94, 0.1);
     --radius: 10px;
     --radius-sm: 6px;
-    --font: "Inter", system-ui, -apple-system, sans-serif;
+    --font: "Montserrat", system-ui, -apple-system, sans-serif;
     --mono: "JetBrains Mono", "Fira Code", monospace;
     --transition: 0.2s ease;
 }
 
 .light {
-    --bg: #f5f2ec;
-    --surface: #ffffff;
-    --surface2: #f0ede8;
-    --line: #e2ddd4;
-    --line-accent: rgba(180, 83, 9, 0.25);
-    --text: #1c1917;
-    --muted: #57534e;
-    --muted2: #a8a29e;
+    --bg: #ffffff;
+    --surface: #f8f9fa;
+    --surface2: #e9ecef;
+    --line: #dee2e6;
+    --line-accent: rgba(180, 83, 9, 0.3);
+    --text: #09090b;
+    --muted: #18181b;
+    --muted2: #52525b;
     --accent: #b45309;
     --accent-hover: #92400e;
-    --accent-bg: rgba(180, 83, 9, 0.07);
+    --accent-bg: rgba(180, 83, 9, 0.08);
     --danger: #dc2626;
     --danger-bg: rgba(220, 38, 38, 0.06);
     --success: #16a34a;
@@ -97,13 +95,13 @@ body {
     flex-shrink: 0;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    background: rgba(15, 17, 23, 0.85);
+    background: rgba(13, 13, 20, 0.85);
     border-bottom: 1px solid var(--line);
     transition: background var(--transition);
 }
 
 .light .navbar {
-    background: rgba(245, 242, 236, 0.88);
+    background: rgba(245, 245, 247, 0.85);
 }
 
 .navbar .container {
@@ -230,35 +228,31 @@ body {
 
 /* ---- Hero ---- */
 .hero {
-    padding: 56px 0 40px;
+    padding: 60px 0 40px;
     text-align: center;
 }
 
 .hero-title {
-    font-size: 3rem;
+    font-size: 2.8rem;
     font-weight: 800;
-    letter-spacing: -0.03em;
-    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
     line-height: 1.15;
-    background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
 .hero p {
-    font-size: 16px;
+    font-size: 15px;
     color: var(--muted);
     max-width: 600px;
-    margin: 0 auto 8px;
+    margin: 0 auto 6px;
     line-height: 1.65;
 }
 
 .hero .subtitle {
     font-family: var(--mono);
-    font-size: 13px;
+    font-size: 12px;
     color: var(--muted2);
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 .hero-badges {
@@ -266,7 +260,7 @@ body {
     gap: 6px;
     flex-wrap: wrap;
     justify-content: center;
-    margin-top: 20px;
+    margin-top: 16px;
 }
 
 .hero-badge {
@@ -290,7 +284,6 @@ body {
 }
 
 .hero-badge:hover {
-    background: var(--accent-bg);
     border-color: var(--accent);
     transform: translateY(-1px);
 }
@@ -306,7 +299,7 @@ body {
 }
 
 .section.active > .container {
-    animation: fadeInUp 0.35s ease both;
+    animation: fadeInUp 0.3s ease both;
 }
 
 .section > .container {
@@ -361,11 +354,9 @@ body {
 .window-dot.red {
     background: #ff5f56;
 }
-
 .window-dot.yellow {
     background: #ffbd2e;
 }
-
 .window-dot.green {
     background: #27c93f;
 }
@@ -396,7 +387,6 @@ body {
     border: 1px solid var(--line);
     border-radius: 8px;
     padding: 20px;
-    transition: border-color var(--transition);
 }
 
 .card-header {
@@ -433,7 +423,7 @@ body {
 
 /* ---- Form ---- */
 .form-label {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     color: var(--muted2);
     text-transform: uppercase;
@@ -569,7 +559,7 @@ body {
 .badge.active {
     background: var(--accent-bg);
     color: var(--accent);
-    border-color: var(--accent-line);
+    border-color: var(--line-accent);
 }
 
 .badges {
@@ -584,7 +574,6 @@ body {
 .badges::-webkit-scrollbar {
     width: 4px;
 }
-
 .badges::-webkit-scrollbar-thumb {
     background: var(--line);
     border-radius: 2px;
@@ -619,7 +608,6 @@ body {
     margin-right: 4px;
     font-size: 13px;
 }
-
 .tabs button:hover {
     color: var(--text);
 }
@@ -655,7 +643,6 @@ body {
     width: 4px;
     height: 4px;
 }
-
 .output-box pre::-webkit-scrollbar-thumb {
     background: var(--line);
     border-radius: 2px;
@@ -835,7 +822,6 @@ body {
     width: 4px;
     height: 4px;
 }
-
 .code-block pre::-webkit-scrollbar-thumb {
     background: var(--line);
     border-radius: 2px;
@@ -1000,60 +986,77 @@ footer a {
     font-weight: 600;
 }
 
-/* ---- History ---- */
-.dbi {
-    padding: 12px 16px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    transition: all var(--transition);
+/* ---- History Table ---- */
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
 }
 
-.dbi:hover {
-    border-color: var(--accent);
+.history-table th {
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted2);
+    border-bottom: 1px solid var(--line);
+    background: var(--surface2);
+}
+
+.history-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+    vertical-align: middle;
+}
+
+.history-table tr:hover td {
     background: var(--accent-bg);
 }
 
-/* ---- Install Section ---- */
-.install-desc {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.7;
-    margin-bottom: 16px;
+.history-table td:first-child {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
 }
 
-.install-desc strong {
+.history-table td:nth-child(2) {
+    font-weight: 600;
     color: var(--text);
 }
 
-.install-steps {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 16px;
+.history-table td:nth-child(3) {
+    font-family: var(--mono);
+    font-size: 10px;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.install-step {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.5;
+.history-table td:nth-child(4) {
+    font-size: 10px;
+    white-space: nowrap;
 }
 
-.install-step .step-num {
-    flex-shrink: 0;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--accent-bg);
-    color: var(--accent);
-    font-weight: 700;
-    font-size: 11px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.history-table .row-idx {
+    cursor: pointer;
+}
+
+@media (max-width: 700px) {
+    .history-table th:nth-child(3),
+    .history-table td:nth-child(3) {
+        display: none;
+    }
+    .history-table td,
+    .history-table th {
+        padding: 8px 8px;
+        font-size: 11px;
+    }
 }
 
 /* ---- Help Accordion ---- */
@@ -1062,7 +1065,6 @@ footer a {
     border: 1px solid var(--line);
     border-radius: var(--radius-sm);
     overflow: hidden;
-    margin-bottom: 8px;
     transition: border-color var(--transition);
 }
 
@@ -1084,7 +1086,7 @@ footer a {
     background: var(--surface2);
 }
 
-.help-item-header i {
+.help-item-header i:first-child {
     font-size: 18px;
     color: var(--accent);
     flex-shrink: 0;
@@ -1133,7 +1135,7 @@ footer a {
     text-decoration: underline;
 }
 
-/* ---- MITRE Map ---- */
+/* ---- MITRE ---- */
 .mitre-stats {
     font-family: var(--mono);
     font-size: 12px;
@@ -1198,11 +1200,9 @@ footer a {
     .navbar .container {
         height: 52px;
     }
-
     .nav-brand {
         font-size: 14px;
     }
-
     .nav-brand img {
         height: 24px !important;
     }
@@ -1252,17 +1252,14 @@ footer a {
     }
 
     .hero {
-        padding: 36px 0 28px;
+        padding: 36px 0 24px;
     }
-
     .hero-title {
         font-size: 2rem;
     }
-
     .hero p {
         font-size: 14px;
     }
-
     .hero-badge {
         font-size: 10px;
         padding: 4px 10px;
@@ -1271,35 +1268,28 @@ footer a {
     .section-header h2 {
         font-size: 18px;
     }
-
     .meta-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-
     .textarea {
         min-height: 90px;
         font-size: 11px;
     }
-
     .db-grid {
         grid-template-columns: 1fr 1fr;
     }
-
     .output-box pre {
         font-size: 10px;
         padding: 10px;
     }
-
     .code-block pre {
         font-size: 10px;
         padding: 10px;
         padding-top: 36px;
     }
-
     .file-row {
         flex-wrap: wrap;
     }
-
     .window-body {
         padding: 16px;
     }
@@ -1309,12 +1299,10 @@ footer a {
     .container {
         padding: 0 12px;
     }
-
     .nav-links button {
         padding: 8px 10px;
         font-size: 13px;
     }
-
     .nav-links button i {
         font-size: 14px;
         width: 18px;
