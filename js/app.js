@@ -2068,13 +2068,13 @@ var toastTimer = null;
 // ==================== THEME ====================
 (function () {
   var saved = localStorage.getItem("wazgenTheme") || "dark";
-  if (saved === "dark") document.body.classList.add("dark");
+  if (saved === "light") document.body.classList.add("light");
 })();
 function toggleTheme() {
-  document.body.classList.toggle("dark");
+  document.body.classList.toggle("light");
   localStorage.setItem(
     "wazgenTheme",
-    document.body.classList.contains("dark") ? "dark" : "light",
+    document.body.classList.contains("light") ? "light" : "dark",
   );
 }
 
@@ -3485,6 +3485,14 @@ function bindEvents() {
     getEl("agentWindows").className = "btn-sm btn-secondary";
   });
 
+  // Download buttons
+  getEl("dlServerBtn").addEventListener("click", function () {
+    downloadScript("instServerPre", "install-wazuh.sh");
+  });
+  getEl("dlAgentBtn").addEventListener("click", function () {
+    downloadScript("instAgentPre", "install-agent.sh");
+  });
+
   // Copy buttons
   document.querySelectorAll(".copy-btn").forEach(function (btn) {
     btn.addEventListener("click", function () {
@@ -3536,10 +3544,23 @@ function switchAgent(os) {
   }
 }
 function copyPre(btn) {
-  var pre = btn.parentElement.querySelector("pre");
+  var pre = btn.closest(".code-block")
+    ? btn.closest(".code-block").querySelector("pre")
+    : btn.parentElement.querySelector("pre");
   if (!pre) return;
   if (navigator.clipboard)
     navigator.clipboard.writeText(pre.textContent).then(function () {
       toast("Copied!");
     });
+}
+function downloadScript(id, filename) {
+  var text = document.getElementById(id).textContent;
+  var blob = new Blob([text], { type: "text/x-shellscript" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast("Downloaded " + filename);
 }
