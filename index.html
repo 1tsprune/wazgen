@@ -6,7 +6,7 @@
 <title>WAZGEN — Wazuh Rule Generator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" href="LOGO.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.26.0/dist/tabler-icons.min.css">
 <link rel="stylesheet" href="css/style.css">
@@ -40,8 +40,8 @@
 <div class="hero" id="heroSec">
   <div class="container">
     <h1 class="hero-title">WAZGEN</h1>
-    <p style="margin-bottom:8px">Paste any log, auto-generate Wazuh XML rule + decoder + MITRE ATT&amp;CK mapping.</p>
-    <p class="italic-accent" style="margin-bottom:16px">No server required. 100+ patterns. Smart parser included.</p>
+    <p>Paste any log &mdash; auto-generate Wazuh XML rule + decoder + MITRE ATT&CK mapping.</p>
+    <p class="subtitle">No server required. 100+ patterns. Smart parser included.</p>
     <div class="hero-badges">
       <span class="hero-badge"><i class="ti ti-wand"></i> Rule Generator</span>
       <span class="hero-badge"><i class="ti ti-shield-lock"></i> Wazuh XML</span>
@@ -57,7 +57,7 @@
 <div class="container">
 <div class="section-header">
   <h2><i class="ti ti-wand" style="color:var(--accent)"></i> Generator</h2>
-  <p>Paste log sample, upload file, atau batch process — auto-generate rule + decoder</p>
+  <p>Paste log sample, upload file, atau batch process &mdash; auto-generate rule + decoder</p>
 </div>
 
 <div class="grid-2" style="align-items:start">
@@ -198,7 +198,7 @@
 <div class="container">
 <div class="section-header">
   <h2><i class="ti ti-database" style="color:var(--accent)"></i> Rule Database</h2>
-  <p>100+ log patterns — klik untuk preview &amp; gunakan sample</p>
+  <p>100+ log patterns &mdash; klik untuk preview &amp; gunakan sample</p>
 </div>
 
 <div class="window-box">
@@ -229,43 +229,76 @@
 <div class="container">
 <div class="section-header">
   <h2><i class="ti ti-terminal-2" style="color:var(--accent)"></i> Install &amp; Deploy</h2>
-  <p>Pilih OS, download script, jalankan di server.</p>
+  <p>Pilih OS, copy atau download script instalasi, lalu jalankan di server Wazuh kamu.</p>
 </div>
-<p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.7">WAZGEN menyediakan script instalasi untuk Wazuh server dan agent. Cukup pilih OS, <strong>copy</strong> atau <strong>download</strong> script, lalu jalankan di server.</p>
-<div style="display:flex;flex-direction:column">
-<div>
+
+<div class="install-desc">
+  WAZGEN menyediakan script instalasi <strong>Wazuh Server</strong> dan <strong>Wazuh Agent</strong> untuk berbagai OS.
+  Pilih OS kamu, lalu <strong>copy</strong> langsung atau <strong>download</strong> script &mdash; jalankan di terminal server.
+</div>
+
+<div style="display:flex;flex-direction:column;gap:16px">
+
+<!-- SERVER -->
 <div class="window-box">
-<div class="window-bar"><span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span><span class="window-title">WAZUH_SERVER.SH</span></div>
+<div class="window-bar"><span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span><span class="window-title">WAZUH_SERVER</span></div>
 <div class="window-body">
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-    <button class="btn-sm btn-primary" onclick="switchInst('ubuntu')">Ubuntu 22.04+</button>
-    <button class="btn-sm btn-secondary" onclick="switchInst('rhel')">RHEL 9 / Rocky 9</button>
+  <div class="form-label" style="margin-bottom:8px">Pilih OS Server</div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+    <button class="btn-sm btn-primary" id="instUbuntu">Ubuntu 22.04+</button>
+    <button class="btn-sm btn-secondary" id="instRhel">RHEL 9 / Rocky 9</button>
   </div>
-  <div class="code-block"><button class="copy-btn" onclick="copyPre(this)">Copy</button><pre id="instServerPre">Loading...</pre></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyPre(this)">Copy</button>
+    <button class="download-btn" onclick="downloadScript('instServerPre','install-wazuh-server.sh')"><i class="ti ti-download"></i> Download</button>
+    <pre id="instServerPre">Loading...</pre>
+  </div>
+  <div style="margin-top:8px;font-size:11px;color:var(--muted2)">
+    <i class="ti ti-info-circle"></i> Script akan menginstall Wazuh manager, indexer, dan dashboard.
+  </div>
 </div>
 </div>
-</div>
-<div>
+
+<!-- AGENT -->
 <div class="window-box">
-<div class="window-bar"><span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span><span class="window-title">WAZUH_AGENT.SH</span></div>
+<div class="window-bar"><span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span><span class="window-title">WAZUH_AGENT</span></div>
 <div class="window-body">
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-    <button class="btn-sm btn-primary" onclick="switchAgent('linux')">Linux</button>
-    <button class="btn-sm btn-secondary" onclick="switchAgent('windows')">Windows</button>
-    <button class="btn-sm btn-secondary" onclick="switchAgent('macos')">macOS</button>
+  <div class="form-label" style="margin-bottom:8px">Pilih OS Agent</div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+    <button class="btn-sm btn-primary" id="agentLinux">Linux</button>
+    <button class="btn-sm btn-secondary" id="agentWindows">Windows</button>
+    <button class="btn-sm btn-secondary" id="agentMacos">macOS</button>
   </div>
-  <div class="code-block"><button class="copy-btn" onclick="copyPre(this)">Copy</button><pre id="instAgentPre">Loading...</pre></div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyPre(this)">Copy</button>
+    <button class="download-btn" onclick="downloadScript('instAgentPre','install-wazuh-agent.sh')"><i class="ti ti-download"></i> Download</button>
+    <pre id="instAgentPre">Loading...</pre>
+  </div>
+  <div style="margin-top:8px;font-size:11px;color:var(--muted2)">
+    <i class="ti ti-info-circle"></i> Ganti <code style="font-family:var(--mono);font-size:10px;background:var(--surface2);padding:1px 5px;border-radius:3px">WAZUH_MANAGER</code> dengan IP server Wazuh kamu.
+  </div>
 </div>
 </div>
+
+<!-- DEPLOY -->
 <div class="window-box">
 <div class="window-bar"><span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span><span class="window-title">RULE_DEPLOY</span></div>
-<div class="window-body"><div class="code-block"><button class="copy-btn" onclick="copyPre(this)">Copy</button><pre>sudo cp local_rules.xml /var/ossec/etc/rules/
+<div class="window-body">
+  <div class="form-label" style="margin-bottom:8px">Deploy Rule ke Server</div>
+  <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:10px">
+    Setelah rule di-generate, simpan sebagai <code style="font-family:var(--mono);font-size:10px;background:var(--surface2);padding:1px 5px;border-radius:3px">local_rules.xml</code> dan jalankan perintah berikut:
+  </div>
+  <div class="code-block">
+    <button class="copy-btn" onclick="copyPre(this)">Copy</button>
+    <pre>sudo cp local_rules.xml /var/ossec/etc/rules/
 sudo chown root:wazuh /var/ossec/etc/rules/local_rules.xml
 sudo chmod 640 /var/ossec/etc/rules/local_rules.xml
 echo 'your log here' | /var/ossec/bin/wazuh-logtest
-sudo systemctl restart wazuh-manager</pre></div></div>
+sudo systemctl restart wazuh-manager</pre>
+  </div>
 </div>
 </div>
+
 </div>
 </div>
 </section>
@@ -275,7 +308,7 @@ sudo systemctl restart wazuh-manager</pre></div></div>
 <div class="container">
 <div class="section-header">
   <h2><i class="ti ti-history" style="color:var(--accent)"></i> Rule History</h2>
-  <p>Riwayat rule yang pernah di-generate — tersimpan di browser kamu (localStorage).</p>
+  <p>Riwayat rule yang pernah di-generate &mdash; tersimpan di browser kamu (localStorage).</p>
 </div>
 
 <div class="window-box" id="historyEmpty" style="text-align:center;padding:40px">
@@ -297,67 +330,87 @@ sudo systemctl restart wazuh-manager</pre></div></div>
 <section class="section" id="sec-help">
 <div class="container">
 <div class="section-header"><h2><i class="ti ti-help-circle" style="color:var(--accent)"></i> Help</h2><p>Panduan lengkap menggunakan WAZGEN</p></div>
-<div style="display:flex;flex-direction:column">
-<div class="window-box">
-<div class="window-bar"><span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span><span class="window-title">USAGE</span></div>
-<div class="window-body">
-  <div class="card-title" style="margin-bottom:6px;font-size:13px"><i class="ti ti-book"></i> Cara Pakai</div>
-  <ol style="font-size:12px;color:var(--muted);line-height:2.2;padding-left:16px">
-    <li>Paste log sample, pilih contoh, atau upload file</li>
-    <li>Atur Rule ID &amp; Level (auto atau manual)</li>
-    <li>Pilih MITRE ATT&CK (opsional, multi-select)</li>
-    <li>Klik <strong>Generate</strong> — auto-generate rule + decoder + ossec.conf</li>
-    <li>Cek tab <strong>Editor</strong> untuk edit XML langsung</li>
-    <li>Klik <strong>Validate</strong> untuk cek syntax XML</li>
-    <li>Copy atau download, deploy ke server</li>
-  </ol>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+
+<div class="help-item open">
+  <div class="help-item-header" onclick="toggleHelp(this)">
+    <i class="ti ti-book"></i>
+    <h3>Cara Pakai</h3>
+    <span class="chevron"><i class="ti ti-chevron-down"></i></span>
+  </div>
+  <div class="help-item-body">
+    <ol>
+      <li><strong>Paste log</strong> sample di textarea, atau pilih dari contoh cepat, atau upload file .log</li>
+      <li><strong>Atur Rule ID</strong> &amp; Level (auto-detect atau manual)</li>
+      <li><strong>Pilih MITRE ATT&CK</strong> techniques (opsional, multi-select)</li>
+      <li>Klik <strong>Generate</strong> &mdash; auto-generate rule XML + decoder + regex</li>
+      <li>Gunakan tab <strong>Preview</strong> untuk lihat alert hasil generate</li>
+      <li>Gunakan tab <strong>Editor</strong> untuk edit XML langsung</li>
+      <li>Klik <strong>Validate XML</strong> untuk cek syntax</li>
+      <li><strong>Copy</strong> atau download, deploy ke server via <strong>Install</strong></li>
+    </ol>
+  </div>
 </div>
+
+<div class="help-item">
+  <div class="help-item-header" onclick="toggleHelp(this)">
+    <i class="ti ti-brain"></i>
+    <h3>Smart Parser</h3>
+    <span class="chevron"><i class="ti ti-chevron-down"></i></span>
+  </div>
+  <div class="help-item-body" style="display:none">
+    <p>Untuk log yang tidak ada di database, smart parser akan auto-detect format dan generate rule sesuai:</p>
+    <ul>
+      <li><strong>JSON</strong> &mdash; auto-parse all fields</li>
+      <li><strong>Syslog</strong> &mdash; timestamp + program + message</li>
+      <li><strong>Key=Value</strong> &mdash; extract key-value pairs</li>
+      <li><strong>Windows Event</strong> &mdash; EventID + fields</li>
+      <li><strong>HTTP Access</strong> &mdash; Apache/Nginx format</li>
+      <li><strong>Generic</strong> &mdash; keyword + IP detection</li>
+    </ul>
+  </div>
 </div>
-<div class="window-box">
-<div class="window-bar"><span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span><span class="window-title">SMART_PARSER</span></div>
-<div class="window-body">
-  <div class="card-title" style="margin-bottom:6px;font-size:13px"><i class="ti ti-brain"></i> Smart Parser</div>
-  <p style="font-size:12px;color:var(--muted);line-height:1.7">Untuk log yang tidak ada di database, smart parser akan auto-detect format dan generate rule sesuai:</p>
-  <ul style="font-size:12px;color:var(--muted);line-height:1.8;padding-left:16px;margin-top:4px">
-    <li><strong>JSON</strong> — auto-parse all fields</li>
-    <li><strong>Syslog</strong> — timestamp + program + message</li>
-    <li><strong>Key=Value</strong> — extract key-value pairs</li>
-    <li><strong>Windows Event</strong> — EventID + fields</li>
-    <li><strong>HTTP Access</strong> — Apache/Nginx format</li>
-    <li><strong>Generic</strong> — keyword + IP detection</li>
-  </ul>
+
+<div class="help-item">
+  <div class="help-item-header" onclick="toggleHelp(this)">
+    <i class="ti ti-robot"></i>
+    <h3>AI Integration</h3>
+    <span class="chevron"><i class="ti ti-chevron-down"></i></span>
+  </div>
+  <div class="help-item-body" style="display:none">
+    <p>WAZGEN bisa diintegrasikan dengan AI lokal maupun cloud untuk generate regex pattern, MITRE mapping, &amp; deskripsi otomatis:</p>
+    <ul>
+      <li><strong>Ollama</strong> &mdash; local, free, private. Run llama3/mistral locally.</li>
+      <li><strong>Google Gemini</strong> &mdash; free tier, 60 req/min, API key needed.</li>
+      <li><strong>Groq Cloud</strong> &mdash; free tier with Llama 3, fast inference.</li>
+    </ul>
+  </div>
 </div>
+
+<div class="help-item">
+  <div class="help-item-header" onclick="toggleHelp(this)">
+    <i class="ti ti-external-link"></i>
+    <h3>Referensi</h3>
+    <span class="chevron"><i class="ti ti-chevron-down"></i></span>
+  </div>
+  <div class="help-item-body" style="display:none">
+    <ul style="list-style:none;padding-left:0">
+      <li><i class="ti ti-link" style="color:var(--accent)"></i> <a href="https://documentation.wazuh.com" target="_blank">Wazuh Documentation</a></li>
+      <li><i class="ti ti-link" style="color:var(--accent)"></i> <a href="https://attack.mitre.org" target="_blank">MITRE ATT&amp;CK</a></li>
+      <li><i class="ti ti-link" style="color:var(--accent)"></i> <a href="https://ollama.com" target="_blank">Ollama (Free AI)</a></li>
+      <li><i class="ti ti-link" style="color:var(--accent)"></i> <a href="https://1tsprune.com" target="_blank">1tsprune Portfolio</a></li>
+    </ul>
+  </div>
 </div>
-<div class="window-box">
-<div class="window-bar"><span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span><span class="window-title">AI</span></div>
-<div class="window-body">
-  <div class="card-title" style="margin-bottom:6px;font-size:13px"><i class="ti ti-robot"></i> AI Integration (Free Options)</div>
-  <ul style="font-size:12px;color:var(--muted);line-height:1.8;padding-left:16px">
-    <li><strong>Ollama</strong> — local, free, private. Run llama3/mistral locally.</li>
-    <li><strong>Google Gemini</strong> — free tier, 60 req/min, API key needed.</li>
-    <li><strong>Groq Cloud</strong> — free tier with Llama 3, fast inference.</li>
-    <li>AI bisa generate regex pattern, MITRE mapping, &amp; deskripsi otomatis.</li>
-  </ul>
-</div>
-</div>
-<div class="window-box">
-<div class="window-bar"><span class="window-dot red"></span><span class="window-dot yellow"></span><span class="window-dot green"></span><span class="window-title">REF</span></div>
-<div class="window-body">
-  <div class="card-title" style="margin-bottom:6px;font-size:13px"><i class="ti ti-external-link"></i> Referensi</div>
-  <ul style="font-size:12px;color:var(--muted);line-height:2.2;padding-left:0;list-style:none">
-    <li><i class="ti ti-link" style="color:var(--accent)"></i> <a href="https://documentation.wazuh.com" target="_blank" style="color:var(--accent);text-decoration:none">Wazuh Docs</a></li>
-    <li><i class="ti ti-link" style="color:var(--accent)"></i> <a href="https://attack.mitre.org" target="_blank" style="color:var(--accent);text-decoration:none">MITRE ATT&CK</a></li>
-    <li><i class="ti ti-link" style="color:var(--accent)"></i> <a href="https://ollama.com" target="_blank" style="color:var(--accent);text-decoration:none">Ollama (Free AI)</a></li>
-  </ul>
-</div>
-</div>
+
 </div>
 </div>
 </section>
 
 <footer>
   <div class="container">
-    <p>&copy; 2026 WAZGEN — built with ❤️ by <a href="https://1tsprune.com" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">1tsprune</a></p>
+    <p>&copy; 2026 WAZGEN &mdash; built with ❤️ by <a href="https://1tsprune.com" target="_blank">1tsprune</a></p>
   </div>
 </footer>
 

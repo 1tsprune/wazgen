@@ -3456,50 +3456,59 @@ function bindEvents() {
   });
 
   // Install
-  getEl("instUbuntu").addEventListener("click", function () {
-    getEl("instServerPre").textContent = INST_SRV_UB;
-    this.className = "btn-sm btn-primary";
-    getEl("instRhel").className = "btn-sm btn-secondary";
-  });
-  getEl("instRhel").addEventListener("click", function () {
-    getEl("instServerPre").textContent = INST_SRV_RH;
-    this.className = "btn-sm btn-primary";
-    getEl("instUbuntu").className = "btn-sm btn-secondary";
-  });
-  getEl("agentLinux").addEventListener("click", function () {
-    getEl("instAgentPre").textContent = INST_AG_LIN;
-    this.className = "btn-sm btn-primary";
-    getEl("agentWindows").className = "btn-sm btn-secondary";
-    getEl("agentMacos").className = "btn-sm btn-secondary";
-  });
-  getEl("agentWindows").addEventListener("click", function () {
-    getEl("instAgentPre").textContent = INST_AG_WIN;
-    this.className = "btn-sm btn-primary";
-    getEl("agentLinux").className = "btn-sm btn-secondary";
-    getEl("agentMacos").className = "btn-sm btn-secondary";
-  });
-  getEl("agentMacos").addEventListener("click", function () {
-    getEl("instAgentPre").textContent = INST_AG_MAC;
-    this.className = "btn-sm btn-primary";
-    getEl("agentLinux").className = "btn-sm btn-secondary";
-    getEl("agentWindows").className = "btn-sm btn-secondary";
-  });
+  var instUbuntu = getEl("instUbuntu");
+  var instRhel = getEl("instRhel");
+  var agentLinux = getEl("agentLinux");
+  var agentWindows = getEl("agentWindows");
+  var agentMacos = getEl("agentMacos");
 
-  // Download buttons
-  getEl("dlServerBtn").addEventListener("click", function () {
-    downloadScript("instServerPre", "install-wazuh.sh");
-  });
-  getEl("dlAgentBtn").addEventListener("click", function () {
-    downloadScript("instAgentPre", "install-agent.sh");
-  });
+  if (instUbuntu && instRhel) {
+    instUbuntu.addEventListener("click", function () {
+      getEl("instServerPre").textContent = INST_SRV_UB;
+      instUbuntu.className = "btn-sm btn-primary";
+      instRhel.className = "btn-sm btn-secondary";
+      toast("Switched to Ubuntu 22.04+");
+    });
+    instRhel.addEventListener("click", function () {
+      getEl("instServerPre").textContent = INST_SRV_RH;
+      instRhel.className = "btn-sm btn-primary";
+      instUbuntu.className = "btn-sm btn-secondary";
+      toast("Switched to RHEL 9 / Rocky 9");
+    });
+  }
 
-  // Copy buttons
+  if (agentLinux && agentWindows && agentMacos) {
+    agentLinux.addEventListener("click", function () {
+      getEl("instAgentPre").textContent = INST_AG_LIN;
+      agentLinux.className = "btn-sm btn-primary";
+      agentWindows.className = "btn-sm btn-secondary";
+      agentMacos.className = "btn-sm btn-secondary";
+      toast("Switched to Linux agent");
+    });
+    agentWindows.addEventListener("click", function () {
+      getEl("instAgentPre").textContent = INST_AG_WIN;
+      agentWindows.className = "btn-sm btn-primary";
+      agentLinux.className = "btn-sm btn-secondary";
+      agentMacos.className = "btn-sm btn-secondary";
+      toast("Switched to Windows agent");
+    });
+    agentMacos.addEventListener("click", function () {
+      getEl("instAgentPre").textContent = INST_AG_MAC;
+      agentMacos.className = "btn-sm btn-primary";
+      agentLinux.className = "btn-sm btn-secondary";
+      agentWindows.className = "btn-sm btn-secondary";
+      toast("Switched to macOS agent");
+    });
+  }
+
+  // Copy buttons (global, works for all .copy-btn)
   document.querySelectorAll(".copy-btn").forEach(function (btn) {
     btn.addEventListener("click", function () {
       var pre = this.parentElement.querySelector("pre");
       if (!pre) return;
+      var text = pre.textContent;
       if (navigator.clipboard)
-        navigator.clipboard.writeText(pre.textContent).then(function () {
+        navigator.clipboard.writeText(text).then(function () {
           toast("Copied!");
         });
     });
@@ -3513,35 +3522,14 @@ if (document.readyState === "loading") {
 }
 
 // ==================== GLOBAL HANDLERS ====================
-function switchInst(os) {
-  if (os === "ubuntu") {
-    document.getElementById("instServerPre").textContent = INST_SRV_UB;
-  } else {
-    document.getElementById("instServerPre").textContent = INST_SRV_RH;
-  }
-  var sel = document.querySelectorAll(
-    "#sec-install .window-box:first-child .btn-sm",
-  );
-  if (sel.length >= 2) {
-    sel[0].className =
-      os === "ubuntu" ? "btn-sm btn-primary" : "btn-sm btn-secondary";
-    sel[1].className =
-      os === "rhel" ? "btn-sm btn-primary" : "btn-sm btn-secondary";
-  }
-}
-function switchAgent(os) {
-  var m = { linux: INST_AG_LIN, windows: INST_AG_WIN, macos: INST_AG_MAC };
-  document.getElementById("instAgentPre").textContent = m[os] || INST_AG_LIN;
-  var btns = document.querySelectorAll(
-    "#sec-install .window-box:nth-child(2) .btn-sm, #sec-install .window-box:nth-of-type(2) .btn-sm",
-  );
-  if (btns.length < 3)
-    btns = document.querySelectorAll("#sec-install .window-box .btn-sm");
-  for (var i = 0; i < btns.length; i++) {
-    var txt = btns[i].textContent.toLowerCase();
-    btns[i].className =
-      txt.indexOf(os) >= 0 ? "btn-sm btn-primary" : "btn-sm btn-secondary";
-  }
+function toggleHelp(header) {
+  var item = header.closest(".help-item");
+  if (!item) return;
+  var body = item.querySelector(".help-item-body");
+  if (!body) return;
+  var isOpen = item.classList.contains("open");
+  item.classList.toggle("open");
+  body.style.display = isOpen ? "none" : "block";
 }
 function copyPre(btn) {
   var pre = btn.closest(".code-block")
