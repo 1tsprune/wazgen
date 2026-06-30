@@ -3349,28 +3349,38 @@ function bindEvents() {
     empty.style.display = "none";
     list.style.display = "block";
     count.textContent = hist.length + " item";
-    items.innerHTML = hist
-      .map(function (h, i) {
-        var d = new Date(h.time);
-        var t = d.toLocaleDateString() + " " + d.toLocaleTimeString();
-        return (
-          '<div class="dbi" onclick="loadHistory(' +
-          i +
-          ')" style="cursor:pointer">' +
-          '<div class="db-item-name">[ID ' +
-          h.id +
-          "] " +
-          h.name +
-          "</div>" +
-          '<div style="font-size:10px;color:var(--muted2);margin:2px 0">' +
-          t +
-          "</div>" +
-          '<div style="font-size:10px;color:var(--muted);font-family:var(--mono)">' +
-          h.log +
-          "</div></div>"
-        );
-      })
-      .join("");
+    var tableHtml =
+      '<table class="history-table"><thead><tr>' +
+      "<th>ID</th><th>Name</th><th>Log Preview</th><th>Date</th><th></th>" +
+      "</tr></thead><tbody>";
+    for (var i = 0; i < hist.length; i++) {
+      var h = hist[i];
+      var d = new Date(h.time);
+      var t = d.toLocaleDateString() + " " + d.toLocaleTimeString();
+      tableHtml +=
+        '<tr class="row-idx" onclick="loadHistory(' +
+        i +
+        ')">' +
+        "<td>" +
+        h.id +
+        "</td>" +
+        "<td>" +
+        h.name +
+        "</td>" +
+        "<td>" +
+        (h.log || "-") +
+        "</td>" +
+        "<td>" +
+        t +
+        "</td>" +
+        '<td style="text-align:right">' +
+        '<button class="btn-xs btn-secondary" onclick="event.stopPropagation();loadHistory(' +
+        i +
+        ')" style="padding:2px 8px">Load</button>' +
+        "</td></tr>";
+    }
+    tableHtml += "</tbody></table>";
+    items.innerHTML = tableHtml;
   }
 
   window.loadHistory = function (idx) {
