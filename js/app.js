@@ -2501,23 +2501,14 @@ function generateRule() {
   };
   var fmt = parsed.fmt || parsed._format || "generic";
   getEl("metaCards").innerHTML =
-    '<div class="meta-card"><div class="meta-label">Rule ID</div><div class="meta-value">' +
+    '<div class="meta-card"><div class="meta-label">ID</div><div class="meta-value">' +
     rid +
     "</div></div>" +
     '<div class="meta-card"><div class="meta-label">Level</div><div class="meta-value">' +
     lv +
     "</div></div>" +
-    '<div class="meta-card"><div class="meta-label">Type</div><div class="meta-value" style="font-size:11px">' +
+    '<div class="meta-card"><div class="meta-label">Match</div><div class="meta-value">' +
     (parsed.name || "Custom") +
-    "</div></div>" +
-    '<div class="meta-card"><div class="meta-label">Format</div><div class="meta-value" style="font-size:10px;font-family:var(--mono)">' +
-    (fmtLabels[fmt] || fmt) +
-    "</div></div>" +
-    '<div class="meta-card"><div class="meta-label">MITRE</div><div class="meta-value" style="font-size:10px">' +
-    mitre.join(", ") +
-    "</div></div>" +
-    '<div class="meta-card"><div class="meta-label">Source</div><div class="meta-value" style="font-size:10px">' +
-    (parsed._source === "smart" ? "Smart Parser" : "Database") +
     "</div></div>";
   // Auto-increment rule ID
   getEl("ruleId").value = rid + 1;
@@ -3266,10 +3257,10 @@ function bindEvents() {
     mbHtml +=
       '<button class="badge" data-m="' +
       sortedTech[mi].id +
+      '" title="' +
+      sortedTech[mi].name +
       '">' +
       sortedTech[mi].id +
-      " " +
-      sortedTech[mi].name +
       "</button>";
   }
   getEl("mitreBadges").innerHTML = mbHtml;

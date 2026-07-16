@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WAZGEN — Wazuh Rule Generator</title>
-<meta name="description" content="Paste a log sample. Get a Wazuh rule and decoder you can copy and deploy.">
+<meta name="description" content="Paste a log. Get Wazuh rule + decoder XML.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -25,7 +25,7 @@
     </button>
     <div class="nav-actions">
       <nav class="nav-links" id="navLinks" aria-label="Primary">
-        <button data-sec="generator" class="active">Workbench</button>
+        <button data-sec="generator" class="active">Generate</button>
         <button data-sec="database">Patterns</button>
         <button data-sec="install">Deploy</button>
       </nav>
@@ -38,105 +38,101 @@
 </header>
 
 <main>
-  <!-- WORKBENCH -->
+  <!-- GENERATE -->
   <section class="surface active" id="sec-generator">
     <div class="shell">
-      <div class="page-head">
-        <div class="page-kicker">Local · no server</div>
-        <h1>Paste a log. Get a Wazuh rule.</h1>
-        <p>One surface: sample in, rule + decoder out. Copy XML, validate, deploy.</p>
+      <div class="intro">
+        <h1>Wazuh rule from any log</h1>
+        <p>Paste sample → generate XML rule + decoder. Runs in your browser.</p>
       </div>
 
-      <div class="workbench">
-        <div class="panel">
-          <div class="panel-title">
-            <h2>Input</h2>
-            <span>log sample</span>
-          </div>
+      <div class="bench">
+        <!-- LEFT: input -->
+        <div class="col-in">
+          <textarea class="logbox" id="logInput" spellcheck="false" placeholder="Paste log here…
 
-          <label class="field-label" for="logInput">Log</label>
-          <textarea class="textarea" id="logInput" placeholder="sshd[1234]: Failed password for root from 192.168.1.10 port 22"></textarea>
+sshd[1234]: Failed password for root from 192.168.1.10 port 22"></textarea>
 
-          <div class="example-list" id="exBtns" aria-label="Quick samples">
-            <button type="button" class="example-btn" data-key="ssh">SSH fail</button>
+          <div class="sample-row" id="exBtns">
+            <span class="sample-label">Try</span>
+            <button type="button" class="example-btn" data-key="ssh">SSH</button>
             <button type="button" class="example-btn" data-key="sudo">Sudo</button>
             <button type="button" class="example-btn" data-key="web">Web</button>
-            <button type="button" class="example-btn" data-key="iptables">IPTables</button>
-            <button type="button" class="example-btn" data-key="forti">FortiGate</button>
-            <button type="button" class="example-btn" data-key="win4625">Win 4625</button>
+            <button type="button" class="example-btn" data-key="iptables">FW</button>
+            <button type="button" class="example-btn" data-key="forti">Forti</button>
+            <button type="button" class="example-btn" data-key="win4625">Win</button>
             <button type="button" class="example-btn" data-key="json">JSON</button>
           </div>
 
-          <div class="file-row">
-            <input type="file" id="batchFile" accept=".log,.txt,.syslog">
-            <button type="button" class="btn btn-secondary btn-sm" id="batchBtn">Parse file</button>
-          </div>
-          <p class="hint">Batch: one rule per line, max ~200 lines.</p>
-
-          <div class="row-2" style="margin-top:var(--space-md)">
-            <div>
-              <label class="field-label" for="ruleId">Rule ID</label>
+          <div class="opts">
+            <div class="opt">
+              <label for="ruleId">Rule ID</label>
               <input class="input" id="ruleId" type="number" value="100200" min="100000" max="999999">
             </div>
-            <div>
-              <label class="field-label" for="levelOverride">Level</label>
+            <div class="opt">
+              <label for="levelOverride">Level</label>
               <select class="select" id="levelOverride">
                 <option value="auto">Auto</option>
-                <option value="3">3 Info</option>
-                <option value="5">5 Low</option>
-                <option value="7">7 Medium</option>
-                <option value="10">10 High</option>
-                <option value="12">12 Critical</option>
-                <option value="15">15 Emergency</option>
+                <option value="3">3</option>
+                <option value="5">5</option>
+                <option value="7">7</option>
+                <option value="10">10</option>
+                <option value="12">12</option>
+                <option value="15">15</option>
               </select>
             </div>
           </div>
 
-          <div style="margin-top:var(--space-md)">
-            <div class="field-label">MITRE (optional)</div>
-            <div class="badges" id="mitreBadges"></div>
-          </div>
+          <details class="more">
+            <summary>More options</summary>
+            <div class="more-body">
+              <div>
+                <div class="field-label">MITRE (optional)</div>
+                <div class="badges" id="mitreBadges"></div>
+              </div>
+              <div class="file-row">
+                <input type="file" id="batchFile" accept=".log,.txt,.syslog">
+                <button type="button" class="btn btn-secondary btn-sm" id="batchBtn">Parse file</button>
+              </div>
+            </div>
+          </details>
 
-          <div class="actions">
-            <button type="button" class="btn btn-primary" id="genBtn">Generate</button>
-            <button type="button" class="btn btn-secondary" id="resetBtn">Reset</button>
+          <div class="cta-row">
+            <button type="button" class="btn btn-primary btn-lg" id="genBtn">Generate rule</button>
+            <button type="button" class="btn btn-secondary" id="resetBtn">Clear</button>
           </div>
         </div>
 
-        <div class="panel" id="outShell">
-          <div class="panel-title">
-            <h2>Output</h2>
-            <span id="outLabel">local_rules.xml</span>
-          </div>
-
+        <!-- RIGHT: output -->
+        <div class="col-out" id="outShell">
           <div id="outEmpty" class="empty-out">
-            <div>
-              <strong>Nothing generated yet</strong>
-              Paste a log, then press Generate.
-            </div>
+            <p class="empty-title">Output appears here</p>
+            <p class="empty-sub">Paste a log on the left, then generate.</p>
           </div>
 
-          <div id="outPanel" style="display:none">
+          <div id="outPanel" class="out-panel" style="display:none">
             <div class="meta-grid" id="metaCards"></div>
 
-            <div class="tabs" id="outTabs">
-              <button type="button" data-tab="preview">Preview</button>
-              <button type="button" data-tab="rule" class="active">Rule</button>
-              <button type="button" data-tab="decoder">Decoder</button>
-              <button type="button" data-tab="regex">Regex</button>
-              <button type="button" data-tab="editor">Editor</button>
-            </div>
-
-            <div class="row" style="margin-bottom:var(--space-xs);justify-content:flex-end">
-              <span id="validBadge" style="display:none"></span>
-              <button type="button" class="btn btn-secondary btn-xs" id="validateBtn">Validate</button>
-              <button type="button" class="btn btn-secondary btn-xs" id="editBtn">Edit</button>
-              <button type="button" class="btn btn-secondary btn-xs" id="copyBtn">Copy</button>
+            <div class="out-toolbar">
+              <div class="tabs" id="outTabs">
+                <button type="button" data-tab="preview">Preview</button>
+                <button type="button" data-tab="rule" class="active">Rule</button>
+                <button type="button" data-tab="decoder">Decoder</button>
+                <button type="button" data-tab="regex">Regex</button>
+                <button type="button" data-tab="editor">Edit</button>
+              </div>
+              <div class="out-actions">
+                <span id="validBadge" style="display:none"></span>
+                <button type="button" class="btn btn-secondary btn-xs" id="validateBtn">Validate</button>
+                <button type="button" class="btn btn-secondary btn-xs" id="editBtn">Edit</button>
+                <button type="button" class="btn btn-primary btn-xs" id="copyBtn">Copy</button>
+              </div>
             </div>
 
             <div class="output-box">
+              <div class="output-file" id="outLabel">local_rules.xml</div>
               <pre id="outCode"></pre>
-              <textarea class="textarea" id="outEditor" style="display:none;min-height:14rem;border:0;border-radius:0"></textarea>
+              <textarea class="textarea editor-area" id="outEditor" style="display:none"></textarea>
             </div>
           </div>
 
@@ -150,37 +146,37 @@
         </div>
       </div>
 
-      <div class="history-block panel" style="margin-top:var(--space-lg)">
-        <div class="panel-title">
-          <h2>Recent rules</h2>
-          <div class="row">
-            <span id="historyCount"></span>
-            <button type="button" class="btn btn-secondary btn-xs" id="historyClear">Clear</button>
+      <details class="hist" id="historyWrap">
+        <summary>
+          <span>Recent rules</span>
+          <span class="hist-count" id="historyCount"></span>
+        </summary>
+        <div class="hist-body">
+          <div class="hist-top">
+            <button type="button" class="btn btn-secondary btn-xs" id="historyClear">Clear all</button>
+          </div>
+          <div id="historyEmpty" class="hint">Empty. History stays in this browser only.</div>
+          <div id="historyList" style="display:none">
+            <div id="historyItems"></div>
           </div>
         </div>
-        <div id="historyEmpty" class="hint">No history yet. Generated rules stay in this browser only.</div>
-        <div id="historyList" style="display:none">
-          <div id="historyItems"></div>
-        </div>
-      </div>
+      </details>
     </div>
   </section>
 
   <!-- PATTERNS -->
   <section class="surface" id="sec-database">
     <div class="shell">
-      <div class="page-head">
-        <div class="page-kicker">Library</div>
-        <h1>Known patterns</h1>
-        <p>Browse samples. Click Use to load into the workbench.</p>
+      <div class="intro">
+        <h1>Patterns</h1>
+        <p>Browse built-in samples. Use one to load the generator.</p>
       </div>
-
       <div class="panel">
-        <input class="db-search" id="dbSearch" placeholder="Search patterns…">
+        <input class="db-search" id="dbSearch" placeholder="Search…">
         <div class="category-filter" id="catFilter"></div>
         <div class="db-grid" id="dbList"></div>
         <div id="dbDetail" style="display:none;margin-top:var(--space-md)">
-          <div class="card" style="border-color:color-mix(in oklch, var(--color-accent) 35%, var(--color-rule))">
+          <div class="card detail-card">
             <div class="card-header">
               <span class="card-title" id="ddName"></span>
               <button type="button" class="btn btn-secondary btn-xs" id="ddClose">Close</button>
@@ -195,18 +191,15 @@
   <!-- DEPLOY -->
   <section class="surface" id="sec-install">
     <div class="shell">
-      <div class="page-head">
-        <div class="page-kicker">Ship it</div>
-        <h1>Install &amp; deploy</h1>
-        <p>Scripts and the four commands you actually need after generate.</p>
+      <div class="intro">
+        <h1>Deploy</h1>
+        <p>Install scripts and where to put the generated rule.</p>
       </div>
-
-      <p class="deploy-note">Pick OS, copy or download, run on the host. Agent scripts need your manager IP.</p>
 
       <div class="stack">
         <div class="panel">
           <div class="panel-title">
-            <h2>Wazuh server</h2>
+            <h2>Server</h2>
             <span>manager + indexer + dashboard</span>
           </div>
           <div class="row" style="margin-bottom:var(--space-sm)">
@@ -222,7 +215,7 @@
 
         <div class="panel">
           <div class="panel-title">
-            <h2>Wazuh agent</h2>
+            <h2>Agent</h2>
             <span>endpoint</span>
           </div>
           <div class="row" style="margin-bottom:var(--space-sm)">
@@ -239,8 +232,7 @@
 
         <div class="panel">
           <div class="panel-title">
-            <h2>Drop generated rules</h2>
-            <span>after copy</span>
+            <h2>Drop rule on server</h2>
           </div>
           <div class="code-block">
             <button type="button" class="copy-btn" onclick="copyPre(this)">Copy</button>
@@ -258,7 +250,7 @@ sudo systemctl restart wazuh-manager</pre>
 
 <footer class="footer">
   <div class="shell">
-    <p>WAZGEN · built by <a href="https://1tsprune.com" target="_blank" rel="noopener">1tsprune</a></p>
+    <p>WAZGEN · <a href="https://1tsprune.com" target="_blank" rel="noopener">1tsprune</a></p>
   </div>
 </footer>
 
