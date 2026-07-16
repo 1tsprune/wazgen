@@ -1,0 +1,69 @@
+/* Hallmark · WAZGEN tokens
+ * genre: modern-minimal · macrostructure: Workbench
+ * theme: custom (warm-gold SIEM) · nav: N1a · footer: Ft2
+ * paper-band: dark · display: geometric-sans · accent: warm
+ */
+
+:root {
+    /* Paper / ink — dark default */
+    --color-paper: oklch(14% 0.012 70);
+    --color-paper-2: oklch(18% 0.014 70);
+    --color-paper-3: oklch(22% 0.016 70);
+    --color-rule: oklch(28% 0.018 70);
+    --color-ink: oklch(94% 0.01 80);
+    --color-ink-2: oklch(72% 0.02 75);
+    --color-ink-3: oklch(55% 0.018 70);
+    --color-accent: oklch(78% 0.09 75);
+    --color-accent-2: oklch(84% 0.08 78);
+    --color-accent-soft: oklch(78% 0.09 75 / 0.12);
+    --color-on-accent: oklch(18% 0.02 60);
+    --color-danger: oklch(62% 0.19 25);
+    --color-success: oklch(72% 0.15 150);
+    --color-focus: oklch(78% 0.11 75);
+
+    /* Light mode */
+    --color-paper-light: oklch(97% 0.012 80);
+    --color-paper-2-light: oklch(100% 0.006 80);
+    --color-paper-3-light: oklch(94% 0.014 80);
+    --color-rule-light: oklch(88% 0.016 80);
+    --color-ink-light: oklch(18% 0.02 60);
+    --color-ink-2-light: oklch(38% 0.02 60);
+    --color-ink-3-light: oklch(52% 0.018 60);
+    --color-accent-light: oklch(52% 0.12 55);
+    --color-accent-2-light: oklch(42% 0.12 50);
+    --color-accent-soft-light: oklch(52% 0.12 55 / 0.1);
+
+    /* Type */
+    --font-display: "Space Grotesk", system-ui, sans-serif;
+    --font-body: "Space Grotesk", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+    --text-xs: 0.6875rem;
+    --text-sm: 0.8125rem;
+    --text-md: 0.9375rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.5rem;
+    --text-2xl: 2rem;
+    --text-display: clamp(1.75rem, 3vw + 0.5rem, 2.5rem);
+
+    /* Space — 4pt */
+    --space-3xs: 0.125rem;
+    --space-2xs: 0.25rem;
+    --space-xs: 0.5rem;
+    --space-sm: 0.75rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2.5rem;
+    --space-2xl: 4rem;
+
+    --radius-sm: 6px;
+    --radius: 10px;
+    --radius-pill: 999px;
+
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --dur-fast: 120ms;
+    --dur: 180ms;
+
+    --shell: 1120px;
+    --nav-h: 56px;
+}

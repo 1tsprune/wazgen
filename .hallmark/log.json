@@ -1,0 +1,13 @@
+[
+  {
+    "date": "2026-07-16",
+    "macrostructure": "Workbench",
+    "theme": "custom",
+    "theme_axes": "dark / geometric-sans / warm",
+    "vibe": "warm-gold SIEM console",
+    "enrichment": "none",
+    "nav": "N1a",
+    "footer": "Ft2",
+    "brief": "WAZGEN · paste log get Wazuh rule · simplify IA"
+  }
+]

@@ -2103,7 +2103,7 @@ function escXml(s) {
 
 // ==================== NAVIGATION ====================
 function showSection(name) {
-  document.querySelectorAll(".section").forEach(function (s) {
+  document.querySelectorAll(".surface, .section").forEach(function (s) {
     s.classList.remove("active");
   });
   var el = getEl("sec-" + name);
@@ -2113,11 +2113,24 @@ function showSection(name) {
     .forEach(function (b) {
       b.classList.toggle("active", b.dataset.sec === name);
     });
-  var hero = getEl("heroSec");
-  if (hero) hero.style.display = name === "generator" ? "block" : "none";
   if (name === "database") renderDB();
-  if (name === "mitre") renderMitreMap();
+  if (name === "generator") renderHistorySafe();
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function renderHistorySafe() {
+  if (typeof renderHistory === "function") {
+    try {
+      renderHistory();
+    } catch (e) {}
+  }
+}
+
+function setOutputVisible(on) {
+  var panel = getEl("outPanel");
+  var empty = getEl("outEmpty");
+  if (panel) panel.style.display = on ? "block" : "none";
+  if (empty) empty.style.display = on ? "none" : "grid";
 }
 
 // ==================== EXAMPLES ====================
@@ -2508,17 +2521,18 @@ function generateRule() {
     "</div></div>";
   // Auto-increment rule ID
   getEl("ruleId").value = rid + 1;
-  getEl("outPanel").style.display = "block";
+  setOutputVisible(true);
   getEl("validBadge").style.display = "none";
   getEl("outEditor").style.display = "none";
   getEl("outCode").style.display = "block";
   switchTab("rule");
-  getEl("outPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+  getEl("outPanel").scrollIntoView({ behavior: "smooth", block: "nearest" });
   toast(
     parsed._source === "smart"
       ? "Smart parser: " + parsed.name + " detected!"
       : "Rule generated!",
   );
+  renderHistorySafe();
 }
 
 // ==================== BATCH UPLOAD ====================
@@ -2847,8 +2861,9 @@ function copyOutput() {
 // ==================== RESET ====================
 function resetAll() {
   getEl("logInput").value = "";
-  getEl("outPanel").style.display = "none";
-  getEl("batchPanel").style.display = "none";
+  setOutputVisible(false);
+  var bp = getEl("batchPanel");
+  if (bp) bp.style.display = "none";
   document.querySelectorAll("#mitreBadges .badge").forEach(function (b) {
     b.classList.remove("active");
   });
@@ -2969,9 +2984,9 @@ function showDbDetail(id) {
     '<div class="output-box"><pre id="ddOut">' +
     escXml(entry.ex) +
     "</pre></div>" +
-    '<div style="margin-top:6px"><button class="btn-sm btn-secondary" onclick="useDbEx(\'' +
+    '<div style="margin-top:8px"><button class="btn-sm btn-secondary" onclick="useDbEx(\'' +
     entry.id +
-    '\')"><i class="ti ti-wand"></i> Use sample</button></div>';
+    "')\">Use in workbench</button></div>";
   getEl("ddContent").innerHTML = h;
   getEl("dbDetail").style.display = "block";
 }
@@ -3065,6 +3080,7 @@ function useDbEx(id) {
 function renderMitreMap() {
   var grid = getEl("mitreMapGrid");
   var tacFilter = getEl("mitreTacticFilter");
+  if (!grid || !tacFilter) return;
   var selTac = "all";
   tacFilter.querySelectorAll("button").forEach(function (b) {
     if (b.classList.contains("active")) selTac = b.dataset.tac;
@@ -3335,20 +3351,22 @@ function bindEvents() {
     }
   });
 
-  function renderHistory() {
+  window.renderHistory = function renderHistory() {
     var hist = JSON.parse(localStorage.getItem("wazgenHistory") || "[]");
     var empty = getEl("historyEmpty");
     var list = getEl("historyList");
     var items = getEl("historyItems");
     var count = getEl("historyCount");
+    if (!empty || !list || !items) return;
     if (hist.length === 0) {
       empty.style.display = "block";
       list.style.display = "none";
+      if (count) count.textContent = "";
       return;
     }
     empty.style.display = "none";
     list.style.display = "block";
-    count.textContent = hist.length + " item";
+    if (count) count.textContent = hist.length + " saved";
     var tableHtml =
       '<table class="history-table"><thead><tr>' +
       "<th>ID</th><th>Name</th><th>Log Preview</th><th>Date</th><th></th>" +
@@ -3381,7 +3399,7 @@ function bindEvents() {
     }
     tableHtml += "</tbody></table>";
     items.innerHTML = tableHtml;
-  }
+  };
 
   window.loadHistory = function (idx) {
     var hist = JSON.parse(localStorage.getItem("wazgenHistory") || "[]");
@@ -3404,17 +3422,10 @@ function bindEvents() {
       h.name +
       "</div></div>" +
       '<div class="meta-card"><div class="meta-label">Source</div><div class="meta-value" style="font-size:10px">History</div></div>';
-    getEl("outPanel").style.display = "block";
+    setOutputVisible(true);
     switchTab("rule");
     showSection("generator");
     toast("Loaded from history");
-  };
-
-  // Override showSection to render history
-  var origShow = showSection;
-  showSection = function (name) {
-    origShow(name);
-    if (name === "history") renderHistory();
   };
 
   // Batch
@@ -3454,16 +3465,19 @@ function bindEvents() {
     getEl("dbDetail").style.display = "none";
   });
 
-  // MITRE map filter
-  getEl("mitreTacticFilter").addEventListener("click", function (e) {
-    var b = e.target.closest("button");
-    if (!b) return;
-    this.querySelectorAll("button").forEach(function (bt) {
-      bt.classList.remove("active");
+  // MITRE map filter (optional surface)
+  var mitreFilter = getEl("mitreTacticFilter");
+  if (mitreFilter) {
+    mitreFilter.addEventListener("click", function (e) {
+      var b = e.target.closest("button");
+      if (!b) return;
+      this.querySelectorAll("button").forEach(function (bt) {
+        bt.classList.remove("active");
+      });
+      b.classList.add("active");
+      renderMitreMap();
     });
-    b.classList.add("active");
-    renderMitreMap();
-  });
+  }
 
   // Install
   var instUbuntu = getEl("instUbuntu");
@@ -3526,9 +3540,15 @@ function bindEvents() {
 }
 
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", bindEvents);
+  document.addEventListener("DOMContentLoaded", function () {
+    bindEvents();
+    setOutputVisible(false);
+    renderHistorySafe();
+  });
 } else {
   bindEvents();
+  setOutputVisible(false);
+  renderHistorySafe();
 }
 
 // ==================== GLOBAL HANDLERS ====================

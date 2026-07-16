@@ -4,390 +4,261 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WAZGEN — Wazuh Rule Generator</title>
+<meta name="description" content="Paste a log sample. Get a Wazuh rule and decoder you can copy and deploy.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" href="LOGO.png">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.26.0/dist/tabler-icons.min.css">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
 <div class="toast" id="toast"></div>
 
-<!-- NAVBAR -->
-<nav class="navbar">
-  <div class="container">
-    <a href="#" class="nav-brand" id="navBrand">
-      <img src="LOGO.png" alt="WAZGEN" style="height:30px">
+<header class="nav">
+  <div class="shell nav-inner">
+    <a href="#" class="brand" id="navBrand">
+      <img src="LOGO.png" alt="">
+      <span>WAZGEN</span>
     </a>
-    <div class="nav-toggle" id="navToggle"><i class="ti ti-menu-2"></i></div>
-    <div class="nav-links" id="navLinks">
-      <button data-sec="generator" class="active"><i class="ti ti-wand"></i> Generator</button>
-      <button data-sec="database"><i class="ti ti-database"></i> Database</button>
-      <button data-sec="install"><i class="ti ti-terminal-2"></i> Install</button>
-      <button data-sec="history"><i class="ti ti-history"></i> History</button>
-      <button data-sec="help"><i class="ti ti-help-circle"></i> Help</button>
-      <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">
-        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <button class="icon-btn nav-toggle" id="navToggle" aria-label="Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <div class="nav-actions">
+      <nav class="nav-links" id="navLinks" aria-label="Primary">
+        <button data-sec="generator" class="active">Workbench</button>
+        <button data-sec="database">Patterns</button>
+        <button data-sec="install">Deploy</button>
+      </nav>
+      <button class="icon-btn" id="themeBtn" aria-label="Toggle theme">
+        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
       </button>
     </div>
   </div>
-</nav>
+</header>
 
-<!-- HERO -->
-<div class="hero" id="heroSec">
-  <div class="container">
-    <h1 class="hero-title">WAZGEN</h1>
-    <p>Paste any log &mdash; auto-generate Wazuh XML rule + decoder + MITRE ATT&CK mapping.</p>
-    <p class="subtitle">No server required. 100+ patterns. Smart parser included.</p>
-    <div class="hero-badges">
-      <span class="hero-badge"><i class="ti ti-wand"></i> Rule Generator</span>
-      <span class="hero-badge"><i class="ti ti-shield-lock"></i> Wazuh XML</span>
-      <span class="hero-badge"><i class="ti ti-target"></i> MITRE ATT&amp;CK</span>
-      <span class="hero-badge"><i class="ti ti-brain"></i> Smart Parser</span>
-      <span class="hero-badge"><i class="ti ti-database"></i> 103 Patterns</span>
-    </div>
-  </div>
-</div>
-
-<!-- ═══ GENERATOR ═══ -->
-<section class="section active" id="sec-generator">
-<div class="container">
-<div class="section-header">
-  <h2><i class="ti ti-wand" style="color:var(--accent)"></i> Generator</h2>
-  <p>Paste log sample, upload file, atau batch process &mdash; auto-generate rule + decoder</p>
-</div>
-
-<div class="grid-2" style="align-items:start">
-<div>
-
-<div class="card">
-  <div class="card-header" style="margin-bottom:10px">
-    <span class="card-title"><i class="ti ti-terminal-2"></i> Log Sample</span>
-  </div>
-  <div style="padding:0">
-    <textarea class="textarea" id="logInput" placeholder="Paste log sample di sini...&#10;&#10;Contoh:&#10;Jun 29 10:23:11 sshd[1234]: Failed password for root from 192.168.1.1 port 22"></textarea>
-  </div>
-
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center">
-    <span class="form-label" style="margin:0;line-height:28px;font-size:10px">Coba:</span>
-    <div class="examples" id="exBtns" style="margin:0">
-      <button data-key="ssh">SSH</button>
-      <button data-key="squid">Squid</button>
-      <button data-key="sudo">Sudo</button>
-      <button data-key="web">Web</button>
-      <button data-key="zeek">Zeek</button>
-      <button data-key="iptables">IPTables</button>
-      <button data-key="forti">FortiGate</button>
-      <button data-key="azure">Azure</button>
-      <button data-key="win4625">Win4625</button>
-      <button data-key="json">JSON</button>
-      <button data-key="kv">K=V</button>
-    </div>
-  </div>
-
-  <div class="file-row" style="margin-top:10px">
-    <span class="form-label" style="margin:0;white-space:nowrap;font-size:10px">Upload:</span>
-    <input type="file" id="batchFile" accept=".log,.txt,.syslog">
-    <button class="btn-sm btn-secondary" id="batchBtn" style="flex-shrink:0"><i class="ti ti-upload"></i> Parse</button>
-  </div>
-  <div style="margin-top:6px;font-size:11px;color:var(--muted2)"><i class="ti ti-info-circle"></i> Multi-line file: auto-detect &amp; generate per baris.</div>
-</div>
-
-<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
-<div class="card" style="flex:1;min-width:120px;padding:14px 16px">
-  <div class="form-label" style="font-size:10px">Rule ID</div>
-  <input class="input" id="ruleId" type="number" value="100200" min="100000" max="999999" style="margin-top:4px">
-</div>
-<div class="card" style="flex:1;min-width:120px;padding:14px 16px">
-  <div class="form-label" style="font-size:10px">Level</div>
-  <select class="select" id="levelOverride" style="margin-top:4px">
-    <option value="auto">Auto detect</option>
-    <option value="3">3 Info</option>
-    <option value="5">5 Low</option>
-    <option value="7">7 Medium</option>
-    <option value="10">10 High</option>
-    <option value="12">12 Critical</option>
-    <option value="15">15 Emergency</option>
-  </select>
-</div>
-</div>
-
-<div class="card">
-  <div class="card-header" style="margin-bottom:6px">
-    <span class="card-title"><i class="ti ti-target"></i> MITRE ATT&CK</span>
-  </div>
-  <div class="badges" id="mitreBadges"></div>
-</div>
-
-<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
-  <button class="btn-primary" id="genBtn"><i class="ti ti-wand"></i> Generate</button>
-  <button class="btn-secondary" id="resetBtn"><i class="ti ti-refresh"></i> Reset</button>
-</div>
-</div>
-
-<div id="outPanel" style="display:none">
-<div class="meta-grid" id="metaCards"></div>
-
-<div class="card">
-  <div class="card-header">
-    <span class="card-title"><i class="ti ti-code"></i> <span id="outLabel">local_rules.xml</span></span>
-    <div style="display:flex;gap:4px">
-      <span id="validBadge" style="display:none"></span>
-      <button class="btn-xs btn-secondary" id="copyBtn"><i class="ti ti-copy"></i> Copy</button>
-    </div>
-  </div>
-
-  <div class="tabs" id="outTabs" style="margin-bottom:10px">
-    <button data-tab="preview"><i class="ti ti-eye"></i> Preview</button>
-    <button data-tab="rule" class="active">Rule XML</button>
-    <button data-tab="decoder">Decoder XML</button>
-    <button data-tab="regex"><i class="ti ti-code"></i> Regex</button>
-    <button data-tab="editor">Editor</button>
-  </div>
-
-  <div class="output-box">
-    <pre id="outCode"></pre>
-    <textarea class="textarea" id="outEditor" style="display:none;min-height:200px;font-size:11px"></textarea>
-  </div>
-  <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-    <button class="btn-xs btn-secondary" id="validateBtn"><i class="ti ti-check"></i> Validate XML</button>
-    <button class="btn-xs btn-secondary" id="editBtn"><i class="ti ti-edit"></i> Edit</button>
-  </div>
-</div>
-
-<!-- Batch results -->
-<div id="batchPanel" style="display:none;margin-top:10px">
-<div class="card">
-  <div class="card-header">
-    <span class="card-title"><i class="ti ti-file-stack"></i> Batch Results</span>
-    <button class="btn-xs btn-secondary" id="batchCopyAll"><i class="ti ti-copy"></i> Copy All</button>
-  </div>
-  <div class="output-box" style="margin-top:8px"><pre id="batchOutput"></pre></div>
-</div>
-</div>
-</div>
-</div>
-
-</div>
-</section>
-
-<!-- ═══ DATABASE ═══ -->
-<section class="section" id="sec-database">
-<div class="container">
-<div class="section-header">
-  <h2><i class="ti ti-database" style="color:var(--accent)"></i> Rule Database</h2>
-  <p>100+ log patterns &mdash; klik untuk preview &amp; gunakan sample</p>
-</div>
-
-<div class="card">
-  <div class="card-header" style="margin-bottom:12px">
-    <span class="card-title"><i class="ti ti-search"></i> Pattern Browser</span>
-  </div>
-  <input class="db-search" id="dbSearch" placeholder="Cari log pattern...">
-  <div class="category-filter" id="catFilter"></div>
-  <div class="db-grid" id="dbList"></div>
-  <div id="dbDetail" style="display:none;margin-top:14px">
-    <div class="card" style="border-color:var(--line-accent)">
-      <div class="card-header">
-        <span class="card-title"><i class="ti ti-file-info"></i> <span id="ddName"></span></span>
-        <button class="btn-xs btn-secondary" id="ddClose"><i class="ti ti-x"></i></button>
+<main>
+  <!-- WORKBENCH -->
+  <section class="surface active" id="sec-generator">
+    <div class="shell">
+      <div class="page-head">
+        <div class="page-kicker">Local · no server</div>
+        <h1>Paste a log. Get a Wazuh rule.</h1>
+        <p>One surface: sample in, rule + decoder out. Copy XML, validate, deploy.</p>
       </div>
-      <div id="ddContent"></div>
+
+      <div class="workbench">
+        <div class="panel">
+          <div class="panel-title">
+            <h2>Input</h2>
+            <span>log sample</span>
+          </div>
+
+          <label class="field-label" for="logInput">Log</label>
+          <textarea class="textarea" id="logInput" placeholder="sshd[1234]: Failed password for root from 192.168.1.10 port 22"></textarea>
+
+          <div class="example-list" id="exBtns" aria-label="Quick samples">
+            <button type="button" class="example-btn" data-key="ssh">SSH fail</button>
+            <button type="button" class="example-btn" data-key="sudo">Sudo</button>
+            <button type="button" class="example-btn" data-key="web">Web</button>
+            <button type="button" class="example-btn" data-key="iptables">IPTables</button>
+            <button type="button" class="example-btn" data-key="forti">FortiGate</button>
+            <button type="button" class="example-btn" data-key="win4625">Win 4625</button>
+            <button type="button" class="example-btn" data-key="json">JSON</button>
+          </div>
+
+          <div class="file-row">
+            <input type="file" id="batchFile" accept=".log,.txt,.syslog">
+            <button type="button" class="btn btn-secondary btn-sm" id="batchBtn">Parse file</button>
+          </div>
+          <p class="hint">Batch: one rule per line, max ~200 lines.</p>
+
+          <div class="row-2" style="margin-top:var(--space-md)">
+            <div>
+              <label class="field-label" for="ruleId">Rule ID</label>
+              <input class="input" id="ruleId" type="number" value="100200" min="100000" max="999999">
+            </div>
+            <div>
+              <label class="field-label" for="levelOverride">Level</label>
+              <select class="select" id="levelOverride">
+                <option value="auto">Auto</option>
+                <option value="3">3 Info</option>
+                <option value="5">5 Low</option>
+                <option value="7">7 Medium</option>
+                <option value="10">10 High</option>
+                <option value="12">12 Critical</option>
+                <option value="15">15 Emergency</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-top:var(--space-md)">
+            <div class="field-label">MITRE (optional)</div>
+            <div class="badges" id="mitreBadges"></div>
+          </div>
+
+          <div class="actions">
+            <button type="button" class="btn btn-primary" id="genBtn">Generate</button>
+            <button type="button" class="btn btn-secondary" id="resetBtn">Reset</button>
+          </div>
+        </div>
+
+        <div class="panel" id="outShell">
+          <div class="panel-title">
+            <h2>Output</h2>
+            <span id="outLabel">local_rules.xml</span>
+          </div>
+
+          <div id="outEmpty" class="empty-out">
+            <div>
+              <strong>Nothing generated yet</strong>
+              Paste a log, then press Generate.
+            </div>
+          </div>
+
+          <div id="outPanel" style="display:none">
+            <div class="meta-grid" id="metaCards"></div>
+
+            <div class="tabs" id="outTabs">
+              <button type="button" data-tab="preview">Preview</button>
+              <button type="button" data-tab="rule" class="active">Rule</button>
+              <button type="button" data-tab="decoder">Decoder</button>
+              <button type="button" data-tab="regex">Regex</button>
+              <button type="button" data-tab="editor">Editor</button>
+            </div>
+
+            <div class="row" style="margin-bottom:var(--space-xs);justify-content:flex-end">
+              <span id="validBadge" style="display:none"></span>
+              <button type="button" class="btn btn-secondary btn-xs" id="validateBtn">Validate</button>
+              <button type="button" class="btn btn-secondary btn-xs" id="editBtn">Edit</button>
+              <button type="button" class="btn btn-secondary btn-xs" id="copyBtn">Copy</button>
+            </div>
+
+            <div class="output-box">
+              <pre id="outCode"></pre>
+              <textarea class="textarea" id="outEditor" style="display:none;min-height:14rem;border:0;border-radius:0"></textarea>
+            </div>
+          </div>
+
+          <div id="batchPanel" style="display:none;margin-top:var(--space-md)">
+            <div class="panel-title">
+              <h2>Batch</h2>
+              <button type="button" class="btn btn-secondary btn-xs" id="batchCopyAll">Copy all</button>
+            </div>
+            <div class="output-box"><pre id="batchOutput"></pre></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="history-block panel" style="margin-top:var(--space-lg)">
+        <div class="panel-title">
+          <h2>Recent rules</h2>
+          <div class="row">
+            <span id="historyCount"></span>
+            <button type="button" class="btn btn-secondary btn-xs" id="historyClear">Clear</button>
+          </div>
+        </div>
+        <div id="historyEmpty" class="hint">No history yet. Generated rules stay in this browser only.</div>
+        <div id="historyList" style="display:none">
+          <div id="historyItems"></div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-</div>
-</section>
+  </section>
 
-<!-- ═══ INSTALL ═══ -->
-<section class="section" id="sec-install">
-<div class="container">
-<div class="section-header">
-  <h2><i class="ti ti-terminal-2" style="color:var(--accent)"></i> Install &amp; Deploy</h2>
-  <p>Pilih OS, copy atau download script, lalu jalankan di server Wazuh kamu.</p>
-</div>
+  <!-- PATTERNS -->
+  <section class="surface" id="sec-database">
+    <div class="shell">
+      <div class="page-head">
+        <div class="page-kicker">Library</div>
+        <h1>Known patterns</h1>
+        <p>Browse samples. Click Use to load into the workbench.</p>
+      </div>
 
-<div class="install-desc">
-  WAZGEN menyediakan script instalasi <strong>Wazuh Server</strong> dan <strong>Wazuh Agent</strong> untuk berbagai OS.
-  Pilih OS kamu, lalu <strong>copy</strong> atau <strong>download</strong> script &mdash; jalankan di terminal server.
-</div>
+      <div class="panel">
+        <input class="db-search" id="dbSearch" placeholder="Search patterns…">
+        <div class="category-filter" id="catFilter"></div>
+        <div class="db-grid" id="dbList"></div>
+        <div id="dbDetail" style="display:none;margin-top:var(--space-md)">
+          <div class="card" style="border-color:color-mix(in oklch, var(--color-accent) 35%, var(--color-rule))">
+            <div class="card-header">
+              <span class="card-title" id="ddName"></span>
+              <button type="button" class="btn btn-secondary btn-xs" id="ddClose">Close</button>
+            </div>
+            <div id="ddContent"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<div style="display:flex;flex-direction:column;gap:16px">
+  <!-- DEPLOY -->
+  <section class="surface" id="sec-install">
+    <div class="shell">
+      <div class="page-head">
+        <div class="page-kicker">Ship it</div>
+        <h1>Install &amp; deploy</h1>
+        <p>Scripts and the four commands you actually need after generate.</p>
+      </div>
 
-<!-- SERVER -->
-<div class="card">
-  <div class="card-header" style="margin-bottom:10px">
-    <span class="card-title"><i class="ti ti-server"></i> Wazuh Server</span>
-  </div>
-  <div class="form-label" style="margin-bottom:8px;font-size:10px">Pilih OS Server</div>
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
-    <button class="btn-sm btn-primary" id="instUbuntu">Ubuntu 22.04+</button>
-    <button class="btn-sm btn-secondary" id="instRhel">RHEL 9 / Rocky 9</button>
-  </div>
-  <div class="code-block">
-    <button class="copy-btn" onclick="copyPre(this)">Copy</button>
-    <button class="download-btn" onclick="downloadScript('instServerPre','install-wazuh-server.sh')"><i class="ti ti-download"></i> Download</button>
-    <pre id="instServerPre">Loading...</pre>
-  </div>
-  <div style="margin-top:8px;font-size:11px;color:var(--muted2)">
-    <i class="ti ti-info-circle"></i> Script akan menginstall Wazuh manager, indexer, dan dashboard.
-  </div>
-</div>
+      <p class="deploy-note">Pick OS, copy or download, run on the host. Agent scripts need your manager IP.</p>
 
-<!-- AGENT -->
-<div class="card">
-  <div class="card-header" style="margin-bottom:10px">
-    <span class="card-title"><i class="ti ti-devices"></i> Wazuh Agent</span>
-  </div>
-  <div class="form-label" style="margin-bottom:8px;font-size:10px">Pilih OS Agent</div>
-  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
-    <button class="btn-sm btn-primary" id="agentLinux">Linux</button>
-    <button class="btn-sm btn-secondary" id="agentWindows">Windows</button>
-    <button class="btn-sm btn-secondary" id="agentMacos">macOS</button>
-  </div>
-  <div class="code-block">
-    <button class="copy-btn" onclick="copyPre(this)">Copy</button>
-    <button class="download-btn" onclick="downloadScript('instAgentPre','install-wazuh-agent.sh')"><i class="ti ti-download"></i> Download</button>
-    <pre id="instAgentPre">Loading...</pre>
-  </div>
-  <div style="margin-top:8px;font-size:11px;color:var(--muted2)">
-    <i class="ti ti-info-circle"></i> Ganti <code style="font-family:var(--mono);font-size:10px;background:var(--surface2);padding:1px 5px;border-radius:3px">WAZUH_MANAGER</code> dengan IP server Wazuh.
-  </div>
-</div>
+      <div class="stack">
+        <div class="panel">
+          <div class="panel-title">
+            <h2>Wazuh server</h2>
+            <span>manager + indexer + dashboard</span>
+          </div>
+          <div class="row" style="margin-bottom:var(--space-sm)">
+            <button type="button" class="btn btn-primary btn-sm" id="instUbuntu">Ubuntu</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="instRhel">RHEL / Rocky</button>
+          </div>
+          <div class="code-block">
+            <button type="button" class="copy-btn" onclick="copyPre(this)">Copy</button>
+            <button type="button" class="download-btn" onclick="downloadScript('instServerPre','install-wazuh-server.sh')">Download</button>
+            <pre id="instServerPre">Loading…</pre>
+          </div>
+        </div>
 
-<!-- DEPLOY -->
-<div class="card">
-  <div class="card-header" style="margin-bottom:10px">
-    <span class="card-title"><i class="ti ti-upload"></i> Deploy Rule</span>
-  </div>
-  <div style="font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:10px">
-    Simpan rule sebagai <code style="font-family:var(--mono);font-size:10px;background:var(--surface2);padding:1px 5px;border-radius:3px">local_rules.xml</code> dan jalankan:
-  </div>
-  <div class="code-block">
-    <button class="copy-btn" onclick="copyPre(this)">Copy</button>
-    <pre>sudo cp local_rules.xml /var/ossec/etc/rules/
+        <div class="panel">
+          <div class="panel-title">
+            <h2>Wazuh agent</h2>
+            <span>endpoint</span>
+          </div>
+          <div class="row" style="margin-bottom:var(--space-sm)">
+            <button type="button" class="btn btn-primary btn-sm" id="agentLinux">Linux</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="agentWindows">Windows</button>
+            <button type="button" class="btn btn-secondary btn-sm" id="agentMacos">macOS</button>
+          </div>
+          <div class="code-block">
+            <button type="button" class="copy-btn" onclick="copyPre(this)">Copy</button>
+            <button type="button" class="download-btn" onclick="downloadScript('instAgentPre','install-wazuh-agent.sh')">Download</button>
+            <pre id="instAgentPre">Loading…</pre>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">
+            <h2>Drop generated rules</h2>
+            <span>after copy</span>
+          </div>
+          <div class="code-block">
+            <button type="button" class="copy-btn" onclick="copyPre(this)">Copy</button>
+            <pre>sudo cp local_rules.xml /var/ossec/etc/rules/
 sudo chown root:wazuh /var/ossec/etc/rules/local_rules.xml
 sudo chmod 640 /var/ossec/etc/rules/local_rules.xml
 echo 'your log here' | /var/ossec/bin/wazuh-logtest
 sudo systemctl restart wazuh-manager</pre>
-  </div>
-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
 
-</div>
-</div>
-</section>
-
-<!-- ═══ HISTORY ═══ -->
-<section class="section" id="sec-history">
-<div class="container">
-<div class="section-header">
-  <h2><i class="ti ti-history" style="color:var(--accent)"></i> Rule History</h2>
-  <p>Riwayat rule yang pernah di-generate &mdash; tersimpan di browser (localStorage).</p>
-</div>
-
-<div class="card" id="historyEmpty" style="text-align:center;padding:40px">
-  <i class="ti ti-inbox" style="font-size:40px;color:var(--muted2);display:block;margin-bottom:12px"></i>
-  <p style="color:var(--muted);font-size:14px">Belum ada riwayat. Generate rule dulu ya!</p>
-</div>
-
-<div id="historyList" style="display:none">
-  <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
-    <button class="btn-sm btn-secondary" id="historyClear"><i class="ti ti-trash"></i> Hapus semua</button>
-    <span style="font-size:12px;color:var(--muted2)" id="historyCount"></span>
-  </div>
-  <div id="historyItems"></div>
-</div>
-</div>
-</section>
-
-<!-- ═══ HELP ═══ -->
-<section class="section" id="sec-help">
-<div class="container">
-<div class="section-header"><h2><i class="ti ti-help-circle" style="color:var(--accent)"></i> Help</h2><p>Panduan lengkap menggunakan WAZGEN</p></div>
-
-<div style="display:flex;flex-direction:column;gap:8px">
-
-<div class="help-item open">
-  <div class="help-item-header" onclick="toggleHelp(this)">
-    <i class="ti ti-book"></i>
-    <h3>Cara Pakai</h3>
-    <span class="chevron"><i class="ti ti-chevron-down"></i></span>
-  </div>
-  <div class="help-item-body">
-    <ol>
-      <li><strong>Paste log</strong> sample di textarea, atau pilih contoh cepat, atau upload file</li>
-      <li><strong>Atur Rule ID</strong> &amp; Level (auto atau manual)</li>
-      <li><strong>Pilih MITRE ATT&CK</strong> techniques (opsional, multi-select)</li>
-      <li>Klik <strong>Generate</strong> &mdash; auto-generate rule + decoder + regex</li>
-      <li>Tab <strong>Preview</strong> untuk lihat alert simulasi</li>
-      <li>Tab <strong>Editor</strong> untuk edit XML langsung</li>
-      <li>Klik <strong>Validate XML</strong> untuk cek syntax</li>
-      <li><strong>Copy</strong> atau download, deploy via <strong>Install</strong></li>
-    </ol>
-  </div>
-</div>
-
-<div class="help-item">
-  <div class="help-item-header" onclick="toggleHelp(this)">
-    <i class="ti ti-brain"></i>
-    <h3>Smart Parser</h3>
-    <span class="chevron"><i class="ti ti-chevron-down"></i></span>
-  </div>
-  <div class="help-item-body" style="display:none">
-    <p>Untuk log yang tidak ada di database, smart parser auto-detect format:</p>
-    <ul>
-      <li><strong>JSON</strong> &mdash; auto-parse all fields</li>
-      <li><strong>Syslog</strong> &mdash; timestamp + program + message</li>
-      <li><strong>Key=Value</strong> &mdash; extract key-value pairs</li>
-      <li><strong>Windows Event</strong> &mdash; EventID + fields</li>
-      <li><strong>HTTP Access</strong> &mdash; Apache/Nginx format</li>
-      <li><strong>Generic</strong> &mdash; keyword + IP detection</li>
-    </ul>
-  </div>
-</div>
-
-<div class="help-item">
-  <div class="help-item-header" onclick="toggleHelp(this)">
-    <i class="ti ti-robot"></i>
-    <h3>AI Integration</h3>
-    <span class="chevron"><i class="ti ti-chevron-down"></i></span>
-  </div>
-  <div class="help-item-body" style="display:none">
-    <p>Integrasi dengan AI lokal maupun cloud untuk generate regex, MITRE mapping, &amp; deskripsi:</p>
-    <ul>
-      <li><strong>Ollama</strong> &mdash; local, free, private (llama3/mistral)</li>
-      <li><strong>Google Gemini</strong> &mdash; free tier, 60 req/min</li>
-      <li><strong>Groq Cloud</strong> &mdash; free tier with Llama 3</li>
-    </ul>
-  </div>
-</div>
-
-<div class="help-item">
-  <div class="help-item-header" onclick="toggleHelp(this)">
-    <i class="ti ti-external-link"></i>
-    <h3>Referensi</h3>
-    <span class="chevron"><i class="ti ti-chevron-down"></i></span>
-  </div>
-  <div class="help-item-body" style="display:none">
-    <ul style="list-style:none;padding-left:0">
-      <li><i class="ti ti-link" style="color:var(--accent)"></i> <a href="https://documentation.wazuh.com" target="_blank">Wazuh Documentation</a></li>
-      <li><i class="ti ti-link" style="color:var(--accent)"></i> <a href="https://attack.mitre.org" target="_blank">MITRE ATT&amp;CK</a></li>
-      <li><i class="ti ti-link" style="color:var(--accent)"></i> <a href="https://ollama.com" target="_blank">Ollama (Free AI)</a></li>
-      <li><i class="ti ti-link" style="color:var(--accent)"></i> <a href="https://1tsprune.com" target="_blank">1tsprune Portfolio</a></li>
-    </ul>
-  </div>
-</div>
-
-</div>
-</div>
-</section>
-
-<footer>
-  <div class="container">
-    <p>&copy; 2026 WAZGEN &mdash; built with ❤️ by <a href="https://1tsprune.com" target="_blank">1tsprune</a></p>
+<footer class="footer">
+  <div class="shell">
+    <p>WAZGEN · built by <a href="https://1tsprune.com" target="_blank" rel="noopener">1tsprune</a></p>
   </div>
 </footer>
 
