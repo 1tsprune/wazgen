@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" href="LOGO.png">
-<link rel="stylesheet" href="css/style.css?v=4">
+<link rel="stylesheet" href="css/style.css?v=5">
 </head>
 <body>
 <div class="toast" id="toast"></div>
@@ -134,11 +134,18 @@ sshd[1234]: Failed password for root from 192.168.1.10 port 22"></textarea>
               </div>
               <div class="out-actions">
                 <span id="validBadge" style="display:none"></span>
-                <button type="button" class="btn btn-secondary btn-xs" id="validateBtn">Validate</button>
-                <button type="button" class="btn btn-secondary btn-xs" id="shareBtn">Share</button>
-                <button type="button" class="btn btn-secondary btn-xs" id="downloadPackBtn">Download pack</button>
-                <button type="button" class="btn btn-secondary btn-xs" id="editBtn">Edit</button>
-                <button type="button" class="btn btn-primary btn-xs" id="copyBtn">Copy</button>
+                <div class="action-primary">
+                  <button type="button" class="btn btn-primary btn-xs" id="copyBtn">Copy</button>
+                  <button type="button" class="btn btn-secondary btn-xs" id="downloadPackBtn">Pack</button>
+                </div>
+                <details class="action-more">
+                  <summary>More</summary>
+                  <div class="action-menu">
+                    <button type="button" class="btn btn-secondary btn-xs" id="validateBtn">Validate</button>
+                    <button type="button" class="btn btn-secondary btn-xs" id="shareBtn">Share</button>
+                    <button type="button" class="btn btn-secondary btn-xs" id="editBtn">Edit</button>
+                  </div>
+                </details>
               </div>
             </div>
 
@@ -325,6 +332,6 @@ sudo systemctl restart wazuh-manager</pre>
   </div>
 </div>
 
-<script src="js/app.js?v=4"></script>
+<script src="js/app.js?v=5"></script>
 </body>
 </html>
