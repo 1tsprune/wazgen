@@ -2669,13 +2669,34 @@ var tabLabels = {
   editor: "rule_editor.xml",
   preview: "alert_preview",
 };
+function hidePreviewPane() {
+  var prev = getEl("outPreview");
+  if (prev) {
+    prev.style.display = "none";
+    prev.innerHTML = "";
+  }
+}
+
+function hidePreviewPane() {
+  var prev = getEl("outPreview");
+  if (prev) {
+    prev.style.display = "none";
+    prev.innerHTML = "";
+  }
+}
+
 function switchTab(name) {
   curTab = name;
   getEl("outLabel").textContent = tabLabels[name] || "output";
+  hidePreviewPane();
   if (name === "preview") {
     getEl("outEditor").style.display = "none";
-    getEl("outCode").style.display = "block";
-    getEl("outCode").textContent = generatePreview();
+    getEl("outCode").style.display = "none";
+    var prev = getEl("outPreview");
+    if (prev) {
+      prev.style.display = "block";
+      prev.innerHTML = generatePreview();
+    }
     return;
   }
   if (name === "regex") {
@@ -2695,70 +2716,77 @@ function switchTab(name) {
 
 function generatePreview() {
   var log = getEl("logInput").value.trim();
+  if (!log) {
+    return '<div class="alert-empty">Generate a rule first to preview the alert.</div>';
+  }
   var det = detectType(log);
   var p = det ? JSON.parse(JSON.stringify(det)) : smartParse(log);
   var lv =
     getEl("levelOverride").value === "auto"
       ? p.rl.lv || 7
       : parseInt(getEl("levelOverride").value);
-  var ip = log.match(/(\d+\.\d+\.\d+\.\d+)/);
-  var srcip = ip ? ip[1] : "-";
-  var user = p.rl.mt || "-";
-  var mitre = selMitre.length > 0 ? selMitre : p.mi || ["-"];
+  var ip = log.match(/(d+.d+.d+.d+)/);
+  var srcip = ip ? ip[1] : "—";
+  var mitre = selMitre.length > 0 ? selMitre : p.mi || [];
   var lvLabel =
-    lv <= 4 ? "INFO" : lv <= 7 ? "MEDIUM" : lv <= 11 ? "HIGH" : "CRITICAL";
-  var lvColor =
-    lv <= 4 ? "34d399" : lv <= 7 ? "fbbf24" : lv <= 11 ? "f97316" : "ef4444";
+    lv <= 4 ? "Info" : lv <= 7 ? "Medium" : lv <= 11 ? "High" : "Critical";
+  var lvTone = lv <= 4 ? "info" : lv <= 7 ? "med" : lv <= 11 ? "high" : "crit";
   var rid = parseInt(getEl("ruleId").value) || 100200;
-  var logShort = log.length > 80 ? log.substring(0, 80) + "..." : log;
+  if (genData.rule) {
+    var m = genData.rule.match(/id="(d+)"/);
+    if (m) rid = parseInt(m[1], 10);
+  }
+  var desc = p.rl.ds || "Log matched";
+  var prog = p.prog || "—";
+  var grp = p.rl.gr || "local";
+  var ts = new Date().toISOString().replace("T", " ").substring(0, 19);
+  var mitreHtml =
+    mitre.length > 0
+      ? mitre
+          .map(function (id) {
+            return '<span class="alert-tag">' + escXml(id) + "</span>";
+          })
+          .join("")
+      : '<span class="alert-muted">none</span>';
 
-  return "".concat(
-    "┌─────────────────────────────────────────────────────────┐\n",
-    "│  ",
-    String.fromCharCode(0x1f6a8),
-    "  ALERT PREVIEW — Level ",
-    lv,
-    " ",
-    lvLabel,
-    "                 │\n",
-    "├─────────────────────────────────────────────────────────┤\n",
-    "│  Rule ID    ",
-    rid,
-    "                                      │\n",
-    "│  Level      ",
-    lv,
-    " — ",
-    lvLabel,
-    "                                    │\n",
-    "│  Description  ",
-    p.rl.ds || "-",
-    "          │\n",
-    "│  Timestamp  ",
-    new Date().toISOString().replace("T", " ").substring(0, 19),
-    "             │\n",
-    "│  Source IP  ",
-    srcip,
-    "                                          │\n",
-    "│  Program    ",
-    p.prog || "-",
-    "                                          │\n",
-    "│  MITRE      ",
-    mitre.join(", "),
-    "                                    │\n",
-    "├─────────────────────────────────────────────────────────┤\n",
-    "│  Log: ",
-    logShort,
-    "   │\n",
-    "├─────────────────────────────────────────────────────────┤\n",
-    "│  ",
-    String.fromCharCode(0x26a1),
-    " Alert akan muncul di Wazuh dashboard dengan     │\n",
-    '│     group "',
-    p.rl.gr || "local",
-    '" dan tag MITRE ',
-    mitre[0],
-    "   │\n",
-    "└─────────────────────────────────────────────────────────┘",
+  return (
+    '<article class="alert-card tone-' +
+    lvTone +
+    '">' +
+    '<header class="alert-head">' +
+    '<div class="alert-level"><span class="alert-dot"></span>Level ' +
+    lv +
+    " · " +
+    lvLabel +
+    "</div>" +
+    '<div class="alert-id">Rule ' +
+    rid +
+    "</div>" +
+    "</header>" +
+    '<h3 class="alert-title">' +
+    escXml(desc) +
+    "</h3>" +
+    '<dl class="alert-kv">' +
+    "<div><dt>Time</dt><dd>" +
+    escXml(ts) +
+    "</dd></div>" +
+    "<div><dt>Source IP</dt><dd>" +
+    escXml(srcip) +
+    "</dd></div>" +
+    "<div><dt>Program</dt><dd>" +
+    escXml(prog) +
+    "</dd></div>" +
+    "<div><dt>Group</dt><dd>" +
+    escXml(grp) +
+    "</dd></div>" +
+    "</dl>" +
+    '<div class="alert-mitre"><span class="alert-muted">MITRE</span> ' +
+    mitreHtml +
+    "</div>" +
+    '<div class="alert-log"><span class="alert-muted">Full log</span><code>' +
+    escXml(log) +
+    "</code></div>" +
+    "</article>"
   );
 }
 
@@ -2853,6 +2881,7 @@ function copyOutput() {
 function resetAll() {
   getEl("logInput").value = "";
   setOutputVisible(false);
+  hidePreviewPane();
   var bp = getEl("batchPanel");
   if (bp) bp.style.display = "none";
   document.querySelectorAll("#mitreBadges .badge").forEach(function (b) {
@@ -3477,42 +3506,43 @@ function bindEvents() {
   var agentWindows = getEl("agentWindows");
   var agentMacos = getEl("agentMacos");
 
+  function setSeg(activeBtn, buttons) {
+    buttons.forEach(function (b) {
+      if (!b) return;
+      b.className = b === activeBtn ? "seg-btn active" : "seg-btn";
+    });
+  }
+
   if (instUbuntu && instRhel) {
     instUbuntu.addEventListener("click", function () {
       getEl("instServerPre").textContent = INST_SRV_UB;
-      instUbuntu.className = "btn-sm btn-primary";
-      instRhel.className = "btn-sm btn-secondary";
-      toast("Switched to Ubuntu 22.04+");
+      setSeg(instUbuntu, [instUbuntu, instRhel]);
     });
     instRhel.addEventListener("click", function () {
       getEl("instServerPre").textContent = INST_SRV_RH;
-      instRhel.className = "btn-sm btn-primary";
-      instUbuntu.className = "btn-sm btn-secondary";
-      toast("Switched to RHEL 9 / Rocky 9");
+      setSeg(instRhel, [instUbuntu, instRhel]);
     });
   }
 
   if (agentLinux && agentWindows && agentMacos) {
     agentLinux.addEventListener("click", function () {
       getEl("instAgentPre").textContent = INST_AG_LIN;
-      agentLinux.className = "btn-sm btn-primary";
-      agentWindows.className = "btn-sm btn-secondary";
-      agentMacos.className = "btn-sm btn-secondary";
-      toast("Switched to Linux agent");
+      setSeg(agentLinux, [agentLinux, agentWindows, agentMacos]);
     });
     agentWindows.addEventListener("click", function () {
       getEl("instAgentPre").textContent = INST_AG_WIN;
-      agentWindows.className = "btn-sm btn-primary";
-      agentLinux.className = "btn-sm btn-secondary";
-      agentMacos.className = "btn-sm btn-secondary";
-      toast("Switched to Windows agent");
+      setSeg(agentWindows, [agentLinux, agentWindows, agentMacos]);
     });
     agentMacos.addEventListener("click", function () {
       getEl("instAgentPre").textContent = INST_AG_MAC;
-      agentMacos.className = "btn-sm btn-primary";
-      agentLinux.className = "btn-sm btn-secondary";
-      agentWindows.className = "btn-sm btn-secondary";
-      toast("Switched to macOS agent");
+      setSeg(agentMacos, [agentLinux, agentWindows, agentMacos]);
+    });
+  }
+
+  var goGen = getEl("goGenFromDeploy");
+  if (goGen) {
+    goGen.addEventListener("click", function () {
+      showSection("generator");
     });
   }
 

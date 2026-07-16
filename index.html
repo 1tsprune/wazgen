@@ -41,9 +41,9 @@
   <!-- GENERATE -->
   <section class="surface active" id="sec-generator">
     <div class="shell">
-      <div class="intro">
-        <h1>Wazuh rule from any log</h1>
-        <p>Paste sample → generate XML rule + decoder. Runs in your browser.</p>
+      <div class="intro intro-compact">
+        <h1>Generate</h1>
+        <p>Paste log · get rule + decoder XML</p>
       </div>
 
       <div class="bench">
@@ -132,6 +132,7 @@ sshd[1234]: Failed password for root from 192.168.1.10 port 22"></textarea>
             <div class="output-box">
               <div class="output-file" id="outLabel">local_rules.xml</div>
               <pre id="outCode"></pre>
+              <div id="outPreview" class="alert-preview" style="display:none"></div>
               <textarea class="textarea editor-area" id="outEditor" style="display:none"></textarea>
             </div>
           </div>
@@ -167,9 +168,9 @@ sshd[1234]: Failed password for root from 192.168.1.10 port 22"></textarea>
   <!-- PATTERNS -->
   <section class="surface" id="sec-database">
     <div class="shell">
-      <div class="intro">
+      <div class="intro intro-compact">
         <h1>Patterns</h1>
-        <p>Browse built-in samples. Use one to load the generator.</p>
+        <p>Pick a sample → load into Generate</p>
       </div>
       <div class="panel">
         <input class="db-search" id="dbSearch" placeholder="Search…">
@@ -191,59 +192,78 @@ sshd[1234]: Failed password for root from 192.168.1.10 port 22"></textarea>
   <!-- DEPLOY -->
   <section class="surface" id="sec-install">
     <div class="shell">
-      <div class="intro">
+      <div class="intro intro-compact">
         <h1>Deploy</h1>
-        <p>Install scripts and where to put the generated rule.</p>
+        <p>From generated XML to a live Wazuh alert</p>
       </div>
 
-      <div class="stack">
-        <div class="panel">
-          <div class="panel-title">
-            <h2>Server</h2>
-            <span>manager + indexer + dashboard</span>
+      <ol class="steps">
+        <li class="step">
+          <div class="step-n">1</div>
+          <div class="step-body">
+            <h2>Generate rule</h2>
+            <p>On Generate, copy <code>Rule</code> and <code>Decoder</code> XML.</p>
+            <button type="button" class="btn btn-secondary btn-sm" data-sec="generator" id="goGenFromDeploy">Open Generate</button>
           </div>
-          <div class="row" style="margin-bottom:var(--space-sm)">
-            <button type="button" class="btn btn-primary btn-sm" id="instUbuntu">Ubuntu</button>
-            <button type="button" class="btn btn-secondary btn-sm" id="instRhel">RHEL / Rocky</button>
-          </div>
-          <div class="code-block">
-            <button type="button" class="copy-btn" onclick="copyPre(this)">Copy</button>
-            <button type="button" class="download-btn" onclick="downloadScript('instServerPre','install-wazuh-server.sh')">Download</button>
-            <pre id="instServerPre">Loading…</pre>
-          </div>
-        </div>
+        </li>
 
-        <div class="panel">
-          <div class="panel-title">
-            <h2>Agent</h2>
-            <span>endpoint</span>
-          </div>
-          <div class="row" style="margin-bottom:var(--space-sm)">
-            <button type="button" class="btn btn-primary btn-sm" id="agentLinux">Linux</button>
-            <button type="button" class="btn btn-secondary btn-sm" id="agentWindows">Windows</button>
-            <button type="button" class="btn btn-secondary btn-sm" id="agentMacos">macOS</button>
-          </div>
-          <div class="code-block">
-            <button type="button" class="copy-btn" onclick="copyPre(this)">Copy</button>
-            <button type="button" class="download-btn" onclick="downloadScript('instAgentPre','install-wazuh-agent.sh')">Download</button>
-            <pre id="instAgentPre">Loading…</pre>
-          </div>
-        </div>
+        <li class="step">
+          <div class="step-n">2</div>
+          <div class="step-body">
+            <h2>Install Wazuh (if needed)</h2>
+            <p>Server first, then agent on each host. Set manager IP in agent scripts.</p>
 
-        <div class="panel">
-          <div class="panel-title">
-            <h2>Drop rule on server</h2>
+            <div class="deploy-grid">
+              <div class="deploy-card">
+                <div class="deploy-head">
+                  <strong>Server</strong>
+                  <div class="seg" role="group" aria-label="Server OS">
+                    <button type="button" class="seg-btn active" id="instUbuntu">Ubuntu</button>
+                    <button type="button" class="seg-btn" id="instRhel">RHEL</button>
+                  </div>
+                </div>
+                <div class="code-block">
+                  <button type="button" class="copy-btn" onclick="copyPre(this)">Copy</button>
+                  <button type="button" class="download-btn" onclick="downloadScript('instServerPre','install-wazuh-server.sh')">.sh</button>
+                  <pre id="instServerPre">Loading…</pre>
+                </div>
+              </div>
+
+              <div class="deploy-card">
+                <div class="deploy-head">
+                  <strong>Agent</strong>
+                  <div class="seg" role="group" aria-label="Agent OS">
+                    <button type="button" class="seg-btn active" id="agentLinux">Linux</button>
+                    <button type="button" class="seg-btn" id="agentWindows">Windows</button>
+                    <button type="button" class="seg-btn" id="agentMacos">macOS</button>
+                  </div>
+                </div>
+                <div class="code-block">
+                  <button type="button" class="copy-btn" onclick="copyPre(this)">Copy</button>
+                  <button type="button" class="download-btn" onclick="downloadScript('instAgentPre','install-wazuh-agent.sh')">file</button>
+                  <pre id="instAgentPre">Loading…</pre>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="code-block">
-            <button type="button" class="copy-btn" onclick="copyPre(this)">Copy</button>
-            <pre>sudo cp local_rules.xml /var/ossec/etc/rules/
+        </li>
+
+        <li class="step">
+          <div class="step-n">3</div>
+          <div class="step-body">
+            <h2>Drop rule on manager</h2>
+            <p>Save XML as <code>local_rules.xml</code>, then run:</p>
+            <div class="code-block">
+              <button type="button" class="copy-btn" onclick="copyPre(this)">Copy</button>
+              <pre>sudo cp local_rules.xml /var/ossec/etc/rules/
 sudo chown root:wazuh /var/ossec/etc/rules/local_rules.xml
 sudo chmod 640 /var/ossec/etc/rules/local_rules.xml
 echo 'your log here' | /var/ossec/bin/wazuh-logtest
 sudo systemctl restart wazuh-manager</pre>
+            </div>
           </div>
-        </div>
-      </div>
+        </li>
+      </ol>
     </div>
   </section>
 </main>
