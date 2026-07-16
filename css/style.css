@@ -1391,6 +1391,153 @@ main {
     }
 }
 
+/* ---- P0-P3 feature UI ---- */
+.id-warn {
+    margin-top: 0.25rem;
+    font-size: 0.68rem;
+    color: oklch(70% 0.16 50);
+    font-weight: 600;
+}
+
+.conf-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem 0.75rem;
+    padding: 0.45rem 0.65rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-rule);
+    font-size: 0.75rem;
+    margin-bottom: 0.15rem;
+}
+
+.conf-pct {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--color-accent);
+}
+
+.conf-label {
+    color: var(--color-ink-2);
+    font-weight: 600;
+}
+
+.conf-src {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--color-ink-3);
+}
+
+.conf-high {
+    background: oklch(70% 0.1 150 / 0.12);
+    border-color: oklch(70% 0.1 150 / 0.35);
+}
+.conf-good {
+    background: var(--color-accent-soft);
+}
+.conf-mid {
+    background: oklch(80% 0.1 90 / 0.1);
+}
+.conf-low {
+    background: oklch(65% 0.15 25 / 0.1);
+}
+
+.check-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    font-size: 0.78rem;
+    color: var(--color-ink-2);
+    cursor: pointer;
+}
+
+.check-row input {
+    margin-top: 0.15rem;
+}
+
+.manager-panel {
+    margin-bottom: 0.85rem;
+}
+
+.manager-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.manager-row .input {
+    flex: 1;
+    min-width: 12rem;
+}
+
+.hist-import-label {
+    cursor: pointer;
+}
+
+.hist-top {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    justify-content: flex-end;
+    margin-bottom: 0.5rem;
+}
+
+kbd {
+    font-family: var(--font-mono);
+    font-size: 0.72em;
+    padding: 0.08rem 0.28rem;
+    border-radius: 4px;
+    border: 1px solid var(--color-rule);
+    background: var(--color-paper-3);
+    color: var(--color-ink-2);
+}
+
+.modal[hidden] {
+    display: none !important;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+}
+
+.modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: oklch(0% 0 0 / 0.55);
+}
+
+.modal-card {
+    position: relative;
+    width: min(100%, 26rem);
+    background: var(--color-paper-2);
+    border: 1px solid var(--color-rule);
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 18px 50px oklch(0% 0 0 / 0.35);
+}
+
+.modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.85rem;
+}
+
+.modal-head h2 {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.modal-body .field-label {
+    margin-top: 0.35rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
     * {
         transition-duration: 0.01ms !important;

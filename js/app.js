@@ -2168,23 +2168,72 @@ function detectLogFormat(log) {
 
 function smartParse(log) {
   var format = detectLogFormat(log);
-  var hasErr = /ERROR|FAIL|DENIED|DENY|REJECT|BLOCK|ALERT|CRITICAL/i.test(log);
+  var hasErr =
+    /ERROR|FAIL|DENIED|DENY|REJECT|BLOCK|ALERT|CRITICAL|INVALID|UNAUTHORIZED/i.test(
+      log,
+    );
   var hasWarn = /WARN|NOTICE|Warning/i.test(log);
   var ip = (log.match(/(\d+\.\d+\.\d+\.\d+)/) || [])[1] || null;
+  var user =
+    (log.match(/\buser[=:]\s*["']?([\w.@-]+)/i) ||
+      log.match(/\bfor (?:invalid user )?([\w.@-]+)/i) ||
+      log.match(/\bUSER=([\w.@-]+)/i) ||
+      [])[1] || null;
+  var url =
+    (log.match(/(?:GET|POST|PUT|DELETE|HEAD|PATCH)\s+(\S+)/i) || [])[1] || null;
+  var action =
+    (log.match(/\baction[=:]\s*["']?([\w.-]+)/i) ||
+      log.match(/\b(DENY|ACCEPT|DROP|BLOCK|REJECT|ALLOW)\b/i) ||
+      [])[1] || null;
+  var status =
+    (log.match(/\b(?:status|code)[=:]\s*(\d{3})\b/i) ||
+      log.match(/"\s(\d{3})\s/) ||
+      [])[1] || null;
+  var prog =
+    (log.match(/\b([a-zA-Z][\w.-]*)\[\d+\]:/) ||
+      log.match(/\b(sshd|sudo|nginx|apache|kernel)\b/i) ||
+      [])[1] || "custom";
+  var fields = [];
+  if (user) fields.push("user");
+  if (ip) fields.push("srcip");
+  if (url) fields.push("url");
+  if (action) fields.push("action");
+  if (status) fields.push("status");
+  if (!fields.length) fields.push("message");
   var desc = hasErr
     ? "Anomaly detected"
     : hasWarn
       ? "Warning condition"
       : "Custom log event";
+  if (user && hasErr) desc = "Auth/access failure for " + user;
+  else if (action) desc = "Network action " + action + " observed";
+  else if (url) desc = "HTTP request to " + url.substring(0, 40);
   var lv = hasErr ? 10 : hasWarn ? 7 : 5;
   var prematch = log.split(/\s+/).slice(0, 3).join(" ").replace(/[<>]/g, "");
+  var escRe = function (t) {
+    return String(t).replace(/[.*+?^$${}()|[\]\\]/g, "\\$&");
+  };
+  var keywords = [];
+  if (hasErr) keywords.push("FAIL|ERROR|DENIED|DENY|BLOCK|REJECT");
+  if (user) keywords.push(escRe(user));
+  if (action) keywords.push(escRe(action));
   var matchText =
-    log.split(/\s+/).slice(3, 6).join(" ").replace(/[<>"]/g, "") || "CUSTOM";
+    keywords.join("|") ||
+    log.split(/\s+/).slice(3, 6).join(" ").replace(/[<>"]/g, "") ||
+    "CUSTOM";
+  var conf = 45;
+  if (format === "json") conf = 70;
+  if (format === "httpd") conf = 68;
+  if (format === "windows") conf = 72;
+  if (ip) conf += 8;
+  if (user) conf += 8;
+  if (hasErr) conf += 5;
+  conf = Math.min(88, conf);
 
   if (format === "json")
     return {
       name: "JSON Log",
-      prog: "custom",
+      prog: prog,
       fmt: "json",
       dc: { n: "custom-json-decoder", p: "json", ty: "json", pm: "" },
       rl: { lv: lv, gr: "local", mt: null, ds: desc },
@@ -2192,6 +2241,8 @@ function smartParse(log) {
       th: "Monitor",
       srcip: ip,
       _format: "json",
+      _conf: conf,
+      _fields: fields,
     };
   if (format === "windows") {
     var eid = (log.match(/EventID=(\d+)/) || [])[1] || "0";
@@ -2210,6 +2261,8 @@ function smartParse(log) {
       th: "Monitor",
       srcip: ip,
       _format: "windows",
+      _conf: conf,
+      _fields: fields,
     };
   }
   if (format === "httpd")
@@ -2224,22 +2277,64 @@ function smartParse(log) {
         rx: '(\\d+\\.\\d+\\.\\d+\\.\\d+) - - \\[\\S+ \\+\\d+\\] "(\\w+) (\\S+) HTTP/[\\d\\.]+" (\\d+)',
         o: "srcip, method, url, status",
       },
-      rl: { lv: 7, gr: "web,local", ds: "HTTP access detected" },
+      rl: { lv: 7, gr: "web,local", mt: matchText, ds: desc },
       mi: ["T1190"],
       th: "Monitor",
       srcip: ip,
       _format: "httpd",
+      _conf: conf,
+      _fields: ["srcip", "method", "url", "status"],
     };
+  if (format === "kv") {
+    var kvParts = log.match(/([A-Za-z_][\w.-]*)=([^\s]+)/g) || [];
+    var order = kvParts
+      .slice(0, 6)
+      .map(function (p) {
+        return p.split("=")[0];
+      })
+      .join(", ");
+    return {
+      name: "Key=Value Log",
+      prog: prog,
+      fmt: "syslog",
+      dc: {
+        n: "custom-kv-decoder",
+        p: "",
+        pm: prematch,
+        rx: "([A-Za-z_][\\w.-]*)=([^\\s]+)",
+        o: order || "key, value",
+      },
+      rl: { lv: lv, gr: "local", mt: matchText, ds: desc },
+      mi: ["T1078"],
+      th: "Monitor",
+      srcip: ip,
+      _format: "kv",
+      _conf: conf,
+      _fields: fields,
+    };
+  }
   return {
     name: "Custom Log",
-    prog: "custom",
+    prog: prog,
     fmt: "syslog",
-    dc: { n: "custom-decoder", p: "", pm: prematch, rx: "", o: "message" },
+    dc: {
+      n: "custom-decoder",
+      p: "",
+      pm: prematch,
+      rx: ip
+        ? "(\\d+\\.\\d+\\.\\d+\\.\\d+)"
+        : user
+          ? "user[=: ]+([^\\s]+)"
+          : "",
+      o: fields.join(", "),
+    },
     rl: { lv: lv, gr: "local", mt: matchText, ds: desc },
     mi: ["T1078"],
     th: "Monitor",
     srcip: ip,
     _format: format,
+    _conf: conf,
+    _fields: fields,
   };
 }
 
@@ -2328,6 +2423,40 @@ function detectType(log) {
 }
 
 // ==================== GENERATE ====================
+function checkRuleIdConflict(rid) {
+  var warn = getEl("idWarn");
+  if (!warn) return false;
+  var hist = JSON.parse(localStorage.getItem("wazgenHistory") || "[]");
+  var hit = null;
+  for (var i = 0; i < hist.length; i++) {
+    if (String(hist[i].id) === String(rid)) {
+      hit = hist[i];
+      break;
+    }
+  }
+  var reserved = rid < 100000 || rid > 120000;
+  if (hit) {
+    warn.style.display = "block";
+    warn.textContent = "ID used in history (" + (hit.name || "rule") + ")";
+    return true;
+  }
+  if (reserved) {
+    warn.style.display = "block";
+    warn.textContent = "Prefer custom IDs 100000-120000";
+    return true;
+  }
+  warn.style.display = "none";
+  warn.textContent = "";
+  return false;
+}
+
+function confidenceFor(parsed) {
+  if (parsed._source === "db") return 92;
+  if (parsed._conf) return parsed._conf;
+  if (parsed._source === "ai") return 78;
+  return 55;
+}
+
 function generateRule() {
   var log = getEl("logInput").value.trim();
   if (!log) {
@@ -2343,11 +2472,14 @@ function generateRule() {
     parsed.srcip = ip ? ip[1] : null;
     parsed.name = det.name;
     parsed._source = "db";
+  } else if (window.__aiParsed && window.__aiParsed._log === log) {
+    parsed = window.__aiParsed;
   } else {
     parsed = smartParse(log);
     parsed._source = "smart";
   }
   var rid = parseInt(getEl("ruleId").value) || 100200;
+  checkRuleIdConflict(rid);
   var lv =
     getEl("levelOverride").value === "auto"
       ? parsed.rl.lv || 7
@@ -2364,6 +2496,8 @@ function generateRule() {
       "      <mitre>\n        <id>" + mitre[m] + "</id>\n      </mitre>\n";
   }
   mxml = mxml.trim();
+  var freqOn = getEl("freqMode") && getEl("freqMode").checked;
+  var ruleOpts = freqOn ? ' frequency="3" timeframe="60"' : "";
 
   var ruleXml = "";
   if (parsed._format === "json" || parsed.fmt === "json") {
@@ -2374,7 +2508,9 @@ function generateRule() {
       rid +
       '" level="' +
       lv +
-      '">\n    <decoded_as>json</decoded_as>\n    <field name="level">error|Error|ERROR</field>\n    <description>' +
+      '"' +
+      ruleOpts +
+      '>\n    <decoded_as>json</decoded_as>\n    <field name="level">error|Error|ERROR</field>\n    <description>' +
       desc +
       "</description>\n    <group>" +
       grp +
@@ -2389,7 +2525,9 @@ function generateRule() {
       rid +
       '" level="' +
       lv +
-      '">\n    <if_sid>' +
+      '"' +
+      ruleOpts +
+      ">\n    <if_sid>" +
       isRaw +
       "</if_sid>\n    <match>" +
       mtRaw +
@@ -2408,7 +2546,9 @@ function generateRule() {
       rid +
       '" level="' +
       lv +
-      '">\n    <match>' +
+      '"' +
+      ruleOpts +
+      ">\n    <match>" +
       mtRaw +
       "</match>\n    <description>" +
       desc +
@@ -2425,7 +2565,9 @@ function generateRule() {
       rid +
       '" level="' +
       lv +
-      '">\n    <match>ERROR|FAIL|DENIED</match>\n    <description>' +
+      '"' +
+      ruleOpts +
+      ">\n    <match>ERROR|FAIL|DENIED</match>\n    <description>" +
       desc +
       "</description>\n    <group>" +
       grp +
@@ -2433,6 +2575,7 @@ function generateRule() {
       mxml +
       "\n  </rule>\n</group>";
   }
+
   var d = parsed.dc,
     decXml = "";
   if (d && d.ty === "json") {
@@ -2469,37 +2612,78 @@ function generateRule() {
       '<decoder name="custom-decoder">\n  <prematch>PREFIX</prematch>\n  <regex>regex</regex>\n  <order>field1, field2</order>\n</decoder>';
   }
 
-  var loc = "/var/log/" + (parsed.prog || "custom") + "/access.log";
+  var progSafe = (parsed.prog || "custom").toString().split("|")[0];
+  var loc = "/var/log/" + progSafe + "/access.log";
   var oss =
-    "<localfile>\n  <log_format>" +
-    parsed.fmt +
+    "<!-- Add under <ossec_config> -->\n<localfile>\n  <log_format>" +
+    (parsed.fmt || "syslog") +
     "</log_format>\n  <location>" +
     loc +
     "</location>\n</localfile>";
   var safe = log.replace(/'/g, "\\'");
   if (safe.length > 200) safe = safe.substring(0, 200);
   var tc =
-    "echo '" +
+    "# wazuh-logtest dry-run\necho '" +
     safe +
-    "' | /var/ossec/bin/wazuh-logtest -v\n\nsudo systemctl restart wazuh-manager";
+    "' | /var/ossec/bin/wazuh-logtest -v\n\n# expected: rule id " +
+    rid +
+    ", level " +
+    lv +
+    ", group " +
+    (r.gr || "local") +
+    "\nsudo systemctl restart wazuh-manager";
 
+  var conf = confidenceFor(parsed);
   genData = {
     rule: ruleXml,
     decoder: decXml,
     ossec: oss,
     test: tc,
     editor: ruleXml,
+    conf: conf,
+    source: parsed._source || "smart",
+    name: parsed.name || "Custom",
+    rid: rid,
+    level: lv,
+    log: log,
+    fields: parsed._fields || [],
   };
-  var fmtLabels = {
-    syslog: "Syslog",
-    json: "JSON",
-    win: "Windows Event",
-    kv: "Key=Value",
-    httpd: "HTTP Access",
-    generic: "Generic",
-    windows: "Windows Event",
-  };
-  var fmt = parsed.fmt || parsed._format || "generic";
+  window.lastParsed = parsed;
+
+  var confLabel =
+    conf >= 90
+      ? "DB match · high confidence"
+      : conf >= 75
+        ? "Strong parse"
+        : conf >= 55
+          ? "Smart parse · review recommended"
+          : "Weak match · review carefully";
+  var confCls =
+    conf >= 90
+      ? "conf-high"
+      : conf >= 75
+        ? "conf-good"
+        : conf >= 55
+          ? "conf-mid"
+          : "conf-low";
+  var confEl = getEl("confBar");
+  if (confEl) {
+    confEl.style.display = "flex";
+    confEl.className = "conf-bar " + confCls;
+    confEl.innerHTML =
+      '<span class="conf-pct">' +
+      conf +
+      '%</span><span class="conf-label">' +
+      confLabel +
+      '</span><span class="conf-src">' +
+      (parsed._source === "db"
+        ? "Database"
+        : parsed._source === "ai"
+          ? "AI assist"
+          : "Smart parser") +
+      "</span>";
+  }
+
   getEl("metaCards").innerHTML =
     '<div class="meta-card"><div class="meta-label">ID</div><div class="meta-value">' +
     rid +
@@ -2510,7 +2694,6 @@ function generateRule() {
     '<div class="meta-card"><div class="meta-label">Match</div><div class="meta-value">' +
     (parsed.name || "Custom") +
     "</div></div>";
-  // Auto-increment rule ID
   getEl("ruleId").value = rid + 1;
   setOutputVisible(true);
   getEl("validBadge").style.display = "none";
@@ -2520,10 +2703,23 @@ function generateRule() {
   getEl("outPanel").scrollIntoView({ behavior: "smooth", block: "nearest" });
   toast(
     parsed._source === "smart"
-      ? "Smart parser: " + parsed.name + " detected!"
-      : "Rule generated!",
+      ? "Smart parser: " + parsed.name + " (" + conf + "%)"
+      : parsed._source === "ai"
+        ? "AI assist rule ready (" + conf + "%)"
+        : "Rule generated (" + conf + "%)",
   );
   renderHistorySafe();
+  try {
+    history.replaceState(
+      null,
+      "",
+      location.pathname +
+        "#log=" +
+        encodeURIComponent(log.substring(0, 800)) +
+        "&id=" +
+        rid,
+    );
+  } catch (e) {}
 }
 
 // ==================== BATCH UPLOAD ====================
@@ -2665,7 +2861,9 @@ function validateXml() {
 var tabLabels = {
   rule: "local_rules.xml",
   decoder: "local_decoder.xml",
+  ossec: "ossec.conf snippet",
   regex: "regex_tester",
+  test: "wazuh-logtest",
   editor: "rule_editor.xml",
   preview: "alert_preview",
 };
@@ -2695,6 +2893,12 @@ function switchTab(name) {
     getEl("outEditor").style.display = "none";
     getEl("outCode").style.display = "block";
     getEl("outCode").textContent = generateRegexTest();
+    return;
+  }
+  if (name === "test") {
+    getEl("outEditor").style.display = "none";
+    getEl("outCode").style.display = "block";
+    getEl("outCode").textContent = genData.test || generateLogtestSim();
     return;
   }
   getEl("outEditor").style.display = name === "editor" ? "block" : "none";
@@ -2852,7 +3056,12 @@ function generateRegexTest() {
 
 // ==================== COPY ====================
 function copyOutput() {
-  var text = curTab === "editor" ? getEl("outEditor").value : genData[curTab];
+  var text;
+  if (curTab === "editor") text = getEl("outEditor").value;
+  else if (curTab === "preview") {
+    var prev = getEl("outPreview");
+    text = prev ? prev.innerText : genData.rule;
+  } else text = genData[curTab];
   if (!text) return;
   if (navigator.clipboard) {
     navigator.clipboard.writeText(text).then(function () {
@@ -2913,11 +3122,12 @@ function renderDB() {
   for (var i = 0; i < DB.length; i++) {
     var e = DB[i];
     if (cat !== "all" && e.cat !== cat) continue;
+    var descTxt = ((e.rl && e.rl.ds) || e.name || "").toLowerCase();
     if (
       term &&
       e.name.toLowerCase().indexOf(term) === -1 &&
       e.id.indexOf(term) === -1 &&
-      e.desc.toLowerCase().indexOf(term) === -1
+      descTxt.indexOf(term) === -1
     )
       continue;
     items.push(e);
@@ -2998,7 +3208,7 @@ function showDbDetail(id) {
     "</pre></div>" +
     '<div style="margin-top:8px"><button class="btn-sm btn-secondary" onclick="useDbEx(\'' +
     entry.id +
-    "')\">Use in workbench</button></div>";
+    "')\">Use & generate</button></div>";
   getEl("ddContent").innerHTML = h;
   getEl("dbDetail").style.display = "block";
 }
@@ -3086,6 +3296,9 @@ function useDbEx(id) {
   getEl("logInput").value = e.ex;
   showSection("generator");
   toast("Loaded: " + e.name);
+  setTimeout(function () {
+    if (typeof generateRule === "function") generateRule();
+  }, 30);
 }
 
 // ==================== MITRE MAP ====================
@@ -3595,3 +3808,411 @@ function downloadScript(id, filename) {
   URL.revokeObjectURL(url);
   toast("Downloaded " + filename);
 }
+
+// ==================== FEATURES P0-P3 ====================
+function generateLogtestSim() {
+  var log = (genData.log || getEl("logInput").value || "").trim();
+  var rid = genData.rid || getEl("ruleId").value;
+  var level = genData.level || "?";
+  var name = genData.name || "rule";
+  var fields = genData.fields || [];
+  var lines = [];
+  lines.push("**Phase 1: Completed pre-decoding.");
+  lines.push(
+    "       full event: '" + log.substring(0, 160).replace(/'/g, "\\'") + "'",
+  );
+  lines.push("");
+  lines.push("**Phase 2: Completed decoding.");
+  if (fields.length) {
+    for (var i = 0; i < fields.length; i++) {
+      lines.push("       " + fields[i] + ": <extracted>");
+    }
+  } else {
+    lines.push("       No decoder fields (match-only rule).");
+  }
+  lines.push("");
+  lines.push("**Phase 3: Completed filtering (rules).");
+  lines.push("       Rule id: '" + rid + "'");
+  lines.push("       Level: '" + level + "'");
+  lines.push("       Description: '" + name + "'");
+  lines.push("");
+  lines.push("# Simulated client-side only. Run real:");
+  lines.push("# echo '<log>' | /var/ossec/bin/wazuh-logtest -v");
+  return lines.join("\n");
+}
+
+function downloadText(filename, text, mime) {
+  var blob = new Blob([text], { type: mime || "text/plain" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function downloadPack() {
+  if (!genData.rule) {
+    toast("Generate dulu");
+    return;
+  }
+  var readme =
+    "WAZGEN pack\n" +
+    "1. Copy local_rules.xml -> /var/ossec/etc/rules/\n" +
+    "2. Copy local_decoder.xml -> /var/ossec/etc/decoders/ (if custom)\n" +
+    "3. Merge ossec_snippet.xml into ossec.conf if needed\n" +
+    "4. systemctl restart wazuh-manager\n";
+  downloadText("local_rules.xml", genData.rule, "application/xml");
+  setTimeout(function () {
+    downloadText("local_decoder.xml", genData.decoder || "", "application/xml");
+  }, 200);
+  setTimeout(function () {
+    downloadText("ossec_snippet.xml", genData.ossec || "", "application/xml");
+  }, 400);
+  setTimeout(function () {
+    downloadText("README_DEPLOY.txt", readme, "text/plain");
+  }, 600);
+  toast("Downloading pack...");
+}
+
+function exportHistory() {
+  var hist = localStorage.getItem("wazgenHistory") || "[]";
+  downloadText(
+    "wazgen-history-" + new Date().toISOString().slice(0, 10) + ".json",
+    hist,
+    "application/json",
+  );
+  toast("History exported");
+}
+
+function importHistory(file) {
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      if (!Array.isArray(data)) throw new Error("not array");
+      localStorage.setItem("wazgenHistory", JSON.stringify(data.slice(0, 50)));
+      renderHistorySafe();
+      toast("Imported " + data.length + " items");
+    } catch (err) {
+      toast("Invalid history JSON");
+    }
+  };
+  reader.readAsText(file);
+}
+
+function shareState() {
+  var log = getEl("logInput").value.trim();
+  if (!log) {
+    toast("No log to share");
+    return;
+  }
+  var id = genData.rid || getEl("ruleId").value;
+  var url =
+    location.origin +
+    location.pathname +
+    "#log=" +
+    encodeURIComponent(log.substring(0, 1200)) +
+    "&id=" +
+    id;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(function () {
+      toast("Share link copied");
+    });
+  } else {
+    prompt("Copy link:", url);
+  }
+}
+
+function loadShareHash() {
+  var h = location.hash || "";
+  if (h.charAt(0) === "#") h = h.slice(1);
+  if (!h) return;
+  var params = {};
+  h.split("&").forEach(function (pair) {
+    var kv = pair.split("=");
+    if (kv[0])
+      params[decodeURIComponent(kv[0])] = decodeURIComponent(
+        kv.slice(1).join("=") || "",
+      );
+  });
+  if (params.log) {
+    getEl("logInput").value = params.log;
+    if (params.id) getEl("ruleId").value = params.id;
+    showSection("generator");
+  }
+}
+
+function getAgentScripts(managerIp) {
+  var ip = managerIp || "192.168.1.10";
+  return {
+    linux: [
+      "# Wazuh Agent - Linux",
+      'WAZUH_MANAGER="' + ip + '"',
+      'if grep -qiE "debian|ubuntu" /etc/os-release 2>/dev/null; then',
+      "  curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | sudo gpg --dearmor -o /usr/share/keyrings/wazuh.gpg",
+      '  echo "deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt/ stable main" | sudo tee /etc/apt/sources.list.d/wazuh.list',
+      "  sudo apt-get update",
+      '  sudo WAZUH_MANAGER="$WAZUH_MANAGER" apt-get install -y wazuh-agent',
+      'elif grep -qiE "rhel|centos|fedora|rocky|almalinux" /etc/os-release 2>/dev/null; then',
+      '  sudo WAZUH_MANAGER="$WAZUH_MANAGER" dnf install -y wazuh-agent',
+      "else",
+      '  echo "Unsupported OS"; exit 1',
+      "fi",
+      "sudo systemctl daemon-reload",
+      "sudo systemctl enable --now wazuh-agent",
+      'echo "Agent installed -> $WAZUH_MANAGER"',
+    ].join("\n"),
+    windows: [
+      "# Wazuh Agent - Windows PowerShell",
+      '$managerIp = "' + ip + '"',
+      '$agentVersion = "4.12.0"',
+      '$url = "https://packages.wazuh.com/4.x/windows/wazuh-agent-$agentVersion-1.msi"',
+      '$output = "$env:TEMP\\wazuh-agent.msi"',
+      "Invoke-WebRequest -Uri $url -OutFile $output",
+      'Start-Process msiexec.exe -ArgumentList "/i $output /quiet WAZUH_MANAGER=$managerIp" -Wait',
+      'Start-Service -Name "WazuhSvc"',
+      'Set-Service -Name "WazuhSvc" -StartupType Automatic',
+    ].join("\n"),
+    macos: [
+      "# Wazuh Agent - macOS",
+      'export WAZUH_MANAGER="' + ip + '"',
+      "curl -sO https://packages.wazuh.com/4.x/macos/wazuh-agent-4.12.0-1.pkg",
+      "sudo installer -pkg wazuh-agent-4.12.0-1.pkg -target /",
+      "sudo /Library/Ossec/bin/wazuh-control start",
+      'echo "Point agent config manager to $WAZUH_MANAGER if needed"',
+    ].join("\n"),
+  };
+}
+
+function applyManagerIp() {
+  var ip = (getEl("managerIp").value || "").trim() || "192.168.1.10";
+  localStorage.setItem("wazgenManagerIp", ip);
+  var scripts = getAgentScripts(ip);
+  INST_AG_LIN = scripts.linux;
+  INST_AG_WIN = scripts.windows;
+  INST_AG_MAC = scripts.macos;
+  var pre = getEl("instAgentPre");
+  if (pre) {
+    var txt = pre.textContent || "";
+    if (/PowerShell|Windows/i.test(txt)) pre.textContent = INST_AG_WIN;
+    else if (/macOS|macos|pkg/i.test(txt)) pre.textContent = INST_AG_MAC;
+    else pre.textContent = INST_AG_LIN;
+  }
+  toast("Manager IP applied: " + ip);
+}
+
+function openSettings() {
+  var m = getEl("settingsModal");
+  if (!m) return;
+  m.hidden = false;
+  getEl("geminiKey").value = localStorage.getItem("wazgenGeminiKey") || "";
+  getEl("geminiModel").value =
+    localStorage.getItem("wazgenGeminiModel") || "gemini-2.0-flash";
+}
+
+function closeSettings() {
+  var m = getEl("settingsModal");
+  if (m) m.hidden = true;
+}
+
+function aiAssist() {
+  var log = getEl("logInput").value.trim();
+  if (!log) {
+    toast("Paste log first");
+    return;
+  }
+  var key = localStorage.getItem("wazgenGeminiKey") || "";
+  if (!key) {
+    openSettings();
+    toast("Set Gemini API key in Settings");
+    return;
+  }
+  var model = localStorage.getItem("wazgenGeminiModel") || "gemini-2.0-flash";
+  var btn = getEl("aiBtn");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "AI...";
+  }
+  toast("Calling Gemini...");
+  var prompt =
+    "You are a Wazuh SIEM expert. From this log, return ONLY compact JSON (no markdown) with keys: " +
+    "name (string), level (int 0-15), group (string), match (string simple), description (string), " +
+    "mitre (array of Txxxx strings max 3), prematch (string), regex (string), order (comma fields).\nLog:\n" +
+    log;
+  var url =
+    "https://generativelanguage.googleapis.com/v1beta/models/" +
+    encodeURIComponent(model) +
+    ":generateContent?key=" +
+    encodeURIComponent(key);
+  fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.2 },
+    }),
+  })
+    .then(function (res) {
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    })
+    .then(function (data) {
+      var text =
+        data &&
+        data.candidates &&
+        data.candidates[0] &&
+        data.candidates[0].content &&
+        data.candidates[0].content.parts &&
+        data.candidates[0].content.parts[0] &&
+        data.candidates[0].content.parts[0].text;
+      if (!text) throw new Error("empty response");
+      text = String(text)
+        .replace(/```json/gi, "")
+        .replace(/```/g, "")
+        .trim();
+      var j = JSON.parse(text);
+      var parsed = {
+        name: j.name || "AI Custom",
+        prog: "custom",
+        fmt: "syslog",
+        dc: {
+          n: "ai-custom-decoder",
+          p: "",
+          pm: j.prematch || "",
+          rx: j.regex || "",
+          o: j.order || "message",
+        },
+        rl: {
+          lv: parseInt(j.level, 10) || 7,
+          gr: j.group || "local",
+          mt: j.match || "ERROR|FAIL",
+          ds: j.description || "AI-generated rule",
+        },
+        mi: Array.isArray(j.mitre) && j.mitre.length ? j.mitre : ["T1078"],
+        th: "Monitor",
+        srcip: (log.match(/(\d+\.\d+\.\d+\.\d+)/) || [])[1] || null,
+        _format: "generic",
+        _source: "ai",
+        _conf: 78,
+        _fields: String(j.order || "message")
+          .split(",")
+          .map(function (x) {
+            return x.trim();
+          }),
+        _log: log,
+      };
+      window.__aiParsed = parsed;
+      if (j.mitre && j.mitre.length) {
+        selMitre = j.mitre.slice();
+        document.querySelectorAll("#mitreBadges .badge").forEach(function (b) {
+          b.classList.toggle("active", selMitre.indexOf(b.dataset.m) !== -1);
+        });
+      }
+      generateRule();
+    })
+    .catch(function (err) {
+      console.error(err);
+      toast("AI failed: " + (err.message || "error"));
+    })
+    .finally(function () {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "AI assist";
+      }
+    });
+}
+
+function bindExtraFeatures() {
+  var tryBtn = getEl("trySampleBtn");
+  if (tryBtn) {
+    tryBtn.addEventListener("click", function () {
+      getEl("logInput").value = exData["ssh"] || DB[0].ex;
+      generateRule();
+    });
+  }
+  var rid = getEl("ruleId");
+  if (rid) {
+    rid.addEventListener("input", function () {
+      checkRuleIdConflict(parseInt(this.value, 10) || 0);
+    });
+  }
+  var dl = getEl("downloadPackBtn");
+  if (dl) dl.addEventListener("click", downloadPack);
+  var sh = getEl("shareBtn");
+  if (sh) sh.addEventListener("click", shareState);
+  var he = getEl("historyExport");
+  if (he) he.addEventListener("click", exportHistory);
+  var hi = getEl("historyImport");
+  if (hi) {
+    hi.addEventListener("change", function () {
+      if (this.files && this.files[0]) importHistory(this.files[0]);
+      this.value = "";
+    });
+  }
+  var ai = getEl("aiBtn");
+  if (ai)
+    ai.addEventListener("click", function () {
+      aiAssist();
+    });
+  var sb = getEl("settingsBtn");
+  if (sb) sb.addEventListener("click", openSettings);
+  var sc = getEl("settingsClose");
+  if (sc) sc.addEventListener("click", closeSettings);
+  document.querySelectorAll("[data-close-settings]").forEach(function (el) {
+    el.addEventListener("click", closeSettings);
+  });
+  var ss = getEl("settingsSave");
+  if (ss) {
+    ss.addEventListener("click", function () {
+      localStorage.setItem("wazgenGeminiKey", getEl("geminiKey").value.trim());
+      localStorage.setItem("wazgenGeminiModel", getEl("geminiModel").value);
+      toast("Settings saved");
+      closeSettings();
+    });
+  }
+  var sk = getEl("settingsClearKey");
+  if (sk) {
+    sk.addEventListener("click", function () {
+      localStorage.removeItem("wazgenGeminiKey");
+      getEl("geminiKey").value = "";
+      toast("API key cleared");
+    });
+  }
+  var mip = getEl("managerIp");
+  if (mip)
+    mip.value = localStorage.getItem("wazgenManagerIp") || "192.168.1.10";
+  var am = getEl("applyManagerIp");
+  if (am) am.addEventListener("click", applyManagerIp);
+  if (mip) applyManagerIp();
+
+  document.addEventListener("keydown", function (e) {
+    var tag = (e.target && e.target.tagName) || "";
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      generateRule();
+    }
+    if (e.key === "/" && tag !== "INPUT" && tag !== "TEXTAREA") {
+      var sec = getEl("sec-database");
+      if (sec && sec.classList.contains("active")) {
+        e.preventDefault();
+        getEl("dbSearch").focus();
+      }
+    }
+  });
+
+  loadShareHash();
+}
+
+(function () {
+  function boot() {
+    bindExtraFeatures();
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function () {
+      setTimeout(boot, 0);
+    });
+  } else {
+    setTimeout(boot, 0);
+  }
+})();

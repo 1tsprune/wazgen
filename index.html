@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="icon" type="image/png" href="LOGO.png">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=4">
 </head>
 <body>
 <div class="toast" id="toast"></div>
@@ -29,6 +29,9 @@
         <button data-sec="database">Patterns</button>
         <button data-sec="install">Deploy</button>
       </nav>
+      <button class="icon-btn" id="settingsBtn" aria-label="Settings" title="Settings & AI">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+      </button>
       <button class="icon-btn" id="themeBtn" aria-label="Toggle theme">
         <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
         <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
@@ -43,11 +46,10 @@
     <div class="shell">
       <div class="intro intro-compact">
         <h1>Generate</h1>
-        <p>Paste log · get rule + decoder XML</p>
+        <p>Paste log · get rule + decoder XML · <kbd>Ctrl</kbd>+<kbd>Enter</kbd></p>
       </div>
 
       <div class="bench">
-        <!-- LEFT: input -->
         <div class="col-in">
           <textarea class="logbox" id="logInput" spellcheck="false" placeholder="Paste log here…
 
@@ -68,6 +70,7 @@ sshd[1234]: Failed password for root from 192.168.1.10 port 22"></textarea>
             <div class="opt">
               <label for="ruleId">Rule ID</label>
               <input class="input" id="ruleId" type="number" value="100200" min="100000" max="999999">
+              <div class="id-warn" id="idWarn" style="display:none"></div>
             </div>
             <div class="opt">
               <label for="levelOverride">Level</label>
@@ -90,6 +93,10 @@ sshd[1234]: Failed password for root from 192.168.1.10 port 22"></textarea>
                 <div class="field-label">MITRE (optional)</div>
                 <div class="badges" id="mitreBadges"></div>
               </div>
+              <label class="check-row">
+                <input type="checkbox" id="freqMode">
+                <span>Correlation: 3 matches in 60s (frequency rule)</span>
+              </label>
               <div class="file-row">
                 <input type="file" id="batchFile" accept=".log,.txt,.syslog">
                 <button type="button" class="btn btn-secondary btn-sm" id="batchBtn">Parse file</button>
@@ -99,31 +106,37 @@ sshd[1234]: Failed password for root from 192.168.1.10 port 22"></textarea>
 
           <div class="cta-row">
             <button type="button" class="btn btn-primary btn-lg" id="genBtn">Generate rule</button>
+            <button type="button" class="btn btn-secondary" id="aiBtn" title="Uses Gemini API key from Settings">AI assist</button>
             <button type="button" class="btn btn-secondary" id="resetBtn">Clear</button>
           </div>
         </div>
 
-        <!-- RIGHT: output -->
         <div class="col-out" id="outShell">
           <div id="outEmpty" class="empty-out">
             <p class="empty-title">Output appears here</p>
-            <p class="empty-sub">Paste a log on the left, then generate.</p>
+            <p class="empty-sub">Paste a log, or try a sample.</p>
+            <button type="button" class="btn btn-secondary btn-sm" id="trySampleBtn">Try SSH sample</button>
           </div>
 
           <div id="outPanel" class="out-panel" style="display:none">
             <div class="meta-grid" id="metaCards"></div>
+            <div id="confBar" class="conf-bar" style="display:none"></div>
 
             <div class="out-toolbar">
               <div class="tabs" id="outTabs">
                 <button type="button" data-tab="preview">Preview</button>
                 <button type="button" data-tab="rule" class="active">Rule</button>
                 <button type="button" data-tab="decoder">Decoder</button>
+                <button type="button" data-tab="ossec">ossec.conf</button>
                 <button type="button" data-tab="regex">Regex</button>
+                <button type="button" data-tab="test">Logtest</button>
                 <button type="button" data-tab="editor">Edit</button>
               </div>
               <div class="out-actions">
                 <span id="validBadge" style="display:none"></span>
                 <button type="button" class="btn btn-secondary btn-xs" id="validateBtn">Validate</button>
+                <button type="button" class="btn btn-secondary btn-xs" id="shareBtn">Share</button>
+                <button type="button" class="btn btn-secondary btn-xs" id="downloadPackBtn">Download pack</button>
                 <button type="button" class="btn btn-secondary btn-xs" id="editBtn">Edit</button>
                 <button type="button" class="btn btn-primary btn-xs" id="copyBtn">Copy</button>
               </div>
@@ -154,6 +167,11 @@ sshd[1234]: Failed password for root from 192.168.1.10 port 22"></textarea>
         </summary>
         <div class="hist-body">
           <div class="hist-top">
+            <button type="button" class="btn btn-secondary btn-xs" id="historyExport">Export</button>
+            <label class="btn btn-secondary btn-xs hist-import-label">
+              Import
+              <input type="file" id="historyImport" accept=".json,application/json" hidden>
+            </label>
             <button type="button" class="btn btn-secondary btn-xs" id="historyClear">Clear all</button>
           </div>
           <div id="historyEmpty" class="hint">Empty. History stays in this browser only.</div>
@@ -170,7 +188,7 @@ sshd[1234]: Failed password for root from 192.168.1.10 port 22"></textarea>
     <div class="shell">
       <div class="intro intro-compact">
         <h1>Patterns</h1>
-        <p>Pick a sample → load into Generate</p>
+        <p>Pick a sample → auto-generate</p>
       </div>
       <div class="panel">
         <input class="db-search" id="dbSearch" placeholder="Search…">
@@ -197,13 +215,22 @@ sshd[1234]: Failed password for root from 192.168.1.10 port 22"></textarea>
         <p>From generated XML to a live Wazuh alert</p>
       </div>
 
+      <div class="panel manager-panel">
+        <label for="managerIp" class="field-label">Wazuh manager IP / hostname</label>
+        <div class="manager-row">
+          <input class="input" id="managerIp" type="text" placeholder="192.168.1.10" autocomplete="off">
+          <button type="button" class="btn btn-secondary btn-sm" id="applyManagerIp">Apply to scripts</button>
+        </div>
+        <p class="hint" style="margin-top:0.4rem">Saved in this browser. Injected into agent install scripts.</p>
+      </div>
+
       <ol class="steps">
         <li class="step">
           <div class="step-n">1</div>
           <div class="step-body">
             <h2>Generate rule</h2>
-            <p>On Generate, copy <code>Rule</code> and <code>Decoder</code> XML.</p>
-            <button type="button" class="btn btn-secondary btn-sm" data-sec="generator" id="goGenFromDeploy">Open Generate</button>
+            <p>On Generate, copy or <strong>Download pack</strong> (rule + decoder + ossec snippet).</p>
+            <button type="button" class="btn btn-secondary btn-sm" id="goGenFromDeploy">Open Generate</button>
           </div>
         </li>
 
@@ -211,8 +238,7 @@ sshd[1234]: Failed password for root from 192.168.1.10 port 22"></textarea>
           <div class="step-n">2</div>
           <div class="step-body">
             <h2>Install Wazuh (if needed)</h2>
-            <p>Server first, then agent on each host. Set manager IP in agent scripts.</p>
-
+            <p>Server first, then agent on each host.</p>
             <div class="deploy-grid">
               <div class="deploy-card">
                 <div class="deploy-head">
@@ -228,7 +254,6 @@ sshd[1234]: Failed password for root from 192.168.1.10 port 22"></textarea>
                   <pre id="instServerPre">Loading…</pre>
                 </div>
               </div>
-
               <div class="deploy-card">
                 <div class="deploy-head">
                   <strong>Agent</strong>
@@ -255,7 +280,7 @@ sshd[1234]: Failed password for root from 192.168.1.10 port 22"></textarea>
             <p>Save XML as <code>local_rules.xml</code>, then run:</p>
             <div class="code-block">
               <button type="button" class="copy-btn" onclick="copyPre(this)">Copy</button>
-              <pre>sudo cp local_rules.xml /var/ossec/etc/rules/
+              <pre id="deployDropPre">sudo cp local_rules.xml /var/ossec/etc/rules/
 sudo chown root:wazuh /var/ossec/etc/rules/local_rules.xml
 sudo chmod 640 /var/ossec/etc/rules/local_rules.xml
 echo 'your log here' | /var/ossec/bin/wazuh-logtest
@@ -274,6 +299,32 @@ sudo systemctl restart wazuh-manager</pre>
   </div>
 </footer>
 
-<script src="js/app.js"></script>
+<!-- Settings modal -->
+<div class="modal" id="settingsModal" hidden>
+  <div class="modal-backdrop" data-close-settings></div>
+  <div class="modal-card" role="dialog" aria-labelledby="settingsTitle">
+    <div class="modal-head">
+      <h2 id="settingsTitle">Settings</h2>
+      <button type="button" class="icon-btn" id="settingsClose" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body">
+      <label class="field-label" for="geminiKey">Gemini API key</label>
+      <input class="input" id="geminiKey" type="password" placeholder="AIza…" autocomplete="off">
+      <p class="hint" style="margin:0.4rem 0 0.85rem">Stored only in this browser (localStorage). Used by <strong>AI assist</strong> for unknown logs. Never uploaded to WAZGEN servers.</p>
+      <label class="field-label" for="geminiModel">Model</label>
+      <select class="select" id="geminiModel">
+        <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+        <option value="gemini-1.5-flash">gemini-1.5-flash</option>
+        <option value="gemini-1.5-pro">gemini-1.5-pro</option>
+      </select>
+      <div class="cta-row" style="margin-top:1rem">
+        <button type="button" class="btn btn-primary" id="settingsSave">Save</button>
+        <button type="button" class="btn btn-secondary" id="settingsClearKey">Clear key</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js?v=4"></script>
 </body>
 </html>
