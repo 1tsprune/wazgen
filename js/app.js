@@ -2115,8 +2115,18 @@ function showSection(name) {
     });
   if (name === "database") renderDB();
   if (name === "generator") renderHistorySafe();
+  if (name === "workspace" && typeof window.renderWorkspace === "function") {
+    try { window.renderWorkspace(); } catch (e) {}
+  }
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
+// publish globals for pro layer
+window.showSection = showSection;
+window.getEl = getEl;
+window.toast = toast;
+window.escXml = escXml;
+window.setOutputVisible = setOutputVisible;
+
 
 function renderHistorySafe() {
   if (typeof renderHistory === "function") {
@@ -3566,6 +3576,7 @@ function bindEvents() {
   // Re-bind to use the overridden version
   getEl("genBtn").removeEventListener("click", origGen2);
   getEl("genBtn").addEventListener("click", generateRule);
+  window.generateRule = generateRule;
 
   // History
   getEl("historyClear").addEventListener("click", function () {
@@ -4216,3 +4227,12 @@ function bindExtraFeatures() {
     setTimeout(boot, 0);
   }
 })();
+
+// expose engine for pro layer
+window.generateRule = generateRule;
+window.switchTab = switchTab;
+window.copyOutput = copyOutput;
+window.toggleTheme = toggleTheme;
+window.shareState = typeof shareState === "function" ? shareState : undefined;
+window.openSettings = typeof openSettings === "function" ? openSettings : undefined;
+window.downloadPack = typeof downloadPack === "function" ? downloadPack : undefined;

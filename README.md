@@ -47,6 +47,12 @@ Mendukung 100+ pola log, smart parser untuk log yang tidak dikenal, proses batch
 | **Rule History** | Auto-save last 50 rules in localStorage |
 | **Dark/Light Mode** | Theme toggle with system preference persistence |
 | **Install Scripts** | Ready-to-use scripts for Wazuh server & agent installation |
+| **Workspace** | Collect rules and export multi-file ZIP pack for manager |
+| **ZIP Pack** | One-click rule+decoder+ossec+README download |
+| **Command Palette** | Ctrl+K actions |
+| **Rule Linter** | Deployability checks after generate |
+| **AI Assist** | Optional Gemini API (key stays in browser) |
+| **PWA** | Offline-capable service worker |
 
 ## 🗄️ Database Coverage
 

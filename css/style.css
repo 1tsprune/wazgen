@@ -1670,6 +1670,89 @@ kbd {
     margin-top: 0.35rem;
 }
 
+
+
+/* ---- Pro layer: lint + palette + workspace ---- */
+.lint-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 0.35rem;
+}
+
+.lint-item {
+    font-size: 0.72rem;
+    padding: 0.35rem 0.55rem;
+    border-radius: 6px;
+    border: 1px solid var(--color-rule);
+    background: var(--color-paper);
+    color: var(--color-ink-2);
+}
+
+.lint-sev {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-right: 0.35rem;
+}
+
+.lint-error {
+    border-color: oklch(62% 0.19 25 / 0.45);
+    background: oklch(62% 0.19 25 / 0.1);
+}
+.lint-error .lint-sev { color: oklch(70% 0.17 25); }
+
+.lint-warn {
+    border-color: oklch(78% 0.14 90 / 0.4);
+    background: oklch(78% 0.14 90 / 0.1);
+}
+.lint-warn .lint-sev { color: oklch(82% 0.12 90); }
+
+.lint-info {
+    border-color: oklch(72% 0.1 220 / 0.35);
+    background: oklch(72% 0.1 220 / 0.08);
+}
+.lint-info .lint-sev { color: oklch(78% 0.1 220); }
+
+.lint-ok {
+    border-color: oklch(70% 0.12 150 / 0.35);
+    background: oklch(70% 0.12 150 / 0.08);
+}
+.lint-ok .lint-sev { color: oklch(75% 0.12 150); }
+
+.palette-card {
+    width: min(100%, 28rem);
+    padding: 0.75rem;
+}
+
+.palette-list {
+    margin-top: 0.5rem;
+    max-height: 16rem;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.palette-item {
+    text-align: left;
+    border: 0;
+    background: transparent;
+    color: var(--color-ink-2);
+    padding: 0.55rem 0.65rem;
+    border-radius: 7px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.palette-item:hover,
+.palette-item.active {
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+}
+
 @media (prefers-reduced-motion: reduce) {
     * {
         transition-duration: 0.01ms !important;
