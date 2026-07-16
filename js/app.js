@@ -2677,14 +2677,6 @@ function hidePreviewPane() {
   }
 }
 
-function hidePreviewPane() {
-  var prev = getEl("outPreview");
-  if (prev) {
-    prev.style.display = "none";
-    prev.innerHTML = "";
-  }
-}
-
 function switchTab(name) {
   curTab = name;
   getEl("outLabel").textContent = tabLabels[name] || "output";
